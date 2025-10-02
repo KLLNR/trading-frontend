@@ -15,11 +15,16 @@ const Login = () => {
       setError('Пароль має бути від 8 до 16 символів');
       return;
     }
-    const result = await login({ email, password });
-    if (result.success) {
-      navigate('/');
-    } else {
-      setError(result.error || 'Помилка логіну');
+    try {
+      const result = await login({ email, password });
+      if (result.success) {
+        navigate('/');
+      } else {
+        setError(result.error || 'Помилка логіну');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.message || 'Помилка мережі');
     }
   };
 

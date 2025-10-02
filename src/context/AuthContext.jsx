@@ -16,7 +16,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    if (token && storedUser) setUser(JSON.parse(storedUser));
+    if (token && storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      setUser(null); // Явно скидаємо, якщо немає даних
+      // Опціонально: редірект через window.location (але краще в App.js)
+    }
     setLoading(false);
   }, []);
 
@@ -36,6 +41,17 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateProfile = async (profileData) => {
+    try {
+      const updatedUser = await userApi.updateProfile(profileData);
+      setUser(updatedUser);
+      return { success: true };
+    } catch (error) {
+      console.error('Update profile failed:', error);
+      return { success: false, error: error.message || 'Помилка оновлення профілю' };
+    }
+  };
+
   const updateAddress = async (addressData) => {
     try {
       const updatedUser = await userApi.updateAddress(addressData);
@@ -48,7 +64,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateAddress, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateProfile, updateAddress, loading }}>
       {children}
     </AuthContext.Provider>
   );
