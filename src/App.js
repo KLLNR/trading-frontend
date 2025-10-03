@@ -1,34 +1,22 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
+import Products from './pages/Products';
+import Categories from './pages/Categories';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return <div>Завантаження...</div>;
-  return user ? children : <Navigate to="/register" replace />; 
-};
-
-const RedirectToLoginOnStart = () => {
-  const { user, loading } = useAuth();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (!loading && !user && location.pathname === '/') {
-      window.location.href = '/login'; 
-    }
-  }, [user, loading, location]);
-
-  return null;
+  return user ? children : <Navigate to="/register" replace />;
 };
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <RedirectToLoginOnStart />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -37,6 +25,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <ProtectedRoute>
+                <Products />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/categories/:categoryName?"
+            element={
+              <ProtectedRoute>
+                <Categories />
               </ProtectedRoute>
             }
           />

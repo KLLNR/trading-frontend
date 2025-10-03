@@ -3,6 +3,14 @@ import axiosClient from './axiosInstance';
 // Ручний перемикач: true для моку, false для реального бекенду
 const USE_MOCK = true;
 
+export const CATEGORIES = [
+  'Електроніка',
+  'Одяг',
+  'Їжа',
+  'Спорт',
+  'Інше',
+];
+
 export const userApi = {
 
   register: async (signUpData) => {
@@ -40,6 +48,9 @@ export const userApi = {
         const mockToken = 'mock-token-123';
         localStorage.setItem('token', mockToken);
         localStorage.setItem('user', JSON.stringify(mockUser));
+        if (!localStorage.getItem('products')) {
+          localStorage.setItem('products', JSON.stringify([{ id: 1, name: 'Товар 1', price: 100, description: 'Опис товару 1' }]));
+        }
         return mockUser;
       }
       throw new Error('Невірний email або пароль');
@@ -111,12 +122,31 @@ export const userApi = {
 
   getProducts: async () => {
     if (USE_MOCK) {
-      return [
-        { id: 1, name: 'Товар 1', price: 100 },
-        { id: 2, name: 'Товар 2', price: 200 },
-      ];
+      const storedProducts = JSON.parse(localStorage.getItem('products'));
+      console.log('Products from localStorage:', storedProducts); // Дебаг
+      return storedProducts || [];
     }
     const response = await axiosClient.get('/api/products');
+    return response.data;
+  },
+
+  addProduct: async (productData) => {
+    if (USE_MOCK) {
+      const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
+      const newProduct = {
+        id: Math.floor(Math.random() * 1000),
+        name: productData.name,
+        price: productData.count,
+        description: productData.description,
+        image: productData.image || 'https://via.placeholder.com/150',
+        category: productData.category || 'Інше',
+        contactInfo: productData.contactInfo || 'Немає даних',
+      };
+      const updatedProducts = [...storedProducts, newProduct];
+      localStorage.setItem('products', JSON.stringify(updatedProducts));
+      return newProduct;
+    }
+    const response = await axiosClient.post('/api/products', productData);
     return response.data;
   },
 };
