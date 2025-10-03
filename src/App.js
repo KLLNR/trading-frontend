@@ -2,13 +2,13 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Home from './pages/Home';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return <div>Завантаження...</div>;
-  if (!user) return <Navigate to="/login" replace />;
-  return children;
+  return user ? children : <Navigate to="/register" replace />; 
 };
 
 const RedirectToLoginOnStart = () => {
@@ -17,7 +17,7 @@ const RedirectToLoginOnStart = () => {
 
   useEffect(() => {
     if (!loading && !user && location.pathname === '/') {
-      window.location.href = '/login'; // Редірект при першому завантаженні
+      window.location.href = '/login'; 
     }
   }, [user, loading, location]);
 
@@ -31,6 +31,7 @@ function App() {
         <RedirectToLoginOnStart />
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route
             path="/"
             element={

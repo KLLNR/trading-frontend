@@ -4,6 +4,27 @@ import axiosClient from './axiosInstance';
 const USE_MOCK = true;
 
 export const userApi = {
+
+  register: async (signUpData) => {
+    if (USE_MOCK) {
+      const newUser = {
+        id: Math.floor(Math.random() * 1000), 
+        firstName: signUpData.firstName,
+        lastName: signUpData.lastName,
+        email: signUpData.email,
+        phone: signUpData.phone,
+        address: signUpData.address,
+        avatar: 'https://via.placeholder.com/150',
+      };
+      const mockToken = 'mock-token-' + newUser.id;
+      localStorage.setItem('token', mockToken);
+      localStorage.setItem('user', JSON.stringify(newUser));
+      return newUser;
+    }
+    const response = await axiosClient.post('/auth/register', signUpData);
+    return response.data;
+  },
+
   login: async (signInData) => {
     if (USE_MOCK) {
       if (signInData.email === 'test@example.com' && signInData.password === 'password123') {

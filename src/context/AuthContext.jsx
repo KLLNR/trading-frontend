@@ -19,11 +19,21 @@ export const AuthProvider = ({ children }) => {
     if (token && storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      setUser(null); // Явно скидаємо, якщо немає даних
-      // Опціонально: редірект через window.location (але краще в App.js)
+      setUser(null);
     }
     setLoading(false);
   }, []);
+
+  const register = async (signUpData) => {
+    try {
+      const userData = await userApi.register(signUpData);
+      setUser(userData);
+      return { success: true };
+    } catch (error) {
+      console.error('Register failed:', error);
+      return { success: false, error: error.message || 'Помилка реєстрації' };
+    }
+  };
 
   const login = async (credentials) => {
     try {
@@ -64,7 +74,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateProfile, updateAddress, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateProfile, updateAddress, loading, register }}>
       {children}
     </AuthContext.Provider>
   );

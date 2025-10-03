@@ -48,8 +48,10 @@ const Login = () => {
         />
         <button type="submit">Увійти</button>
       </form>
+        <p>Немає акаунту? <a href="/register">Зареєструватися</a></p>
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
+    
   );
 };
 
