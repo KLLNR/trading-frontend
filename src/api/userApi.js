@@ -49,7 +49,7 @@ export const userApi = {
         localStorage.setItem('token', mockToken);
         localStorage.setItem('user', JSON.stringify(mockUser));
         if (!localStorage.getItem('products')) {
-          localStorage.setItem('products', JSON.stringify([{ id: 1, name: 'Товар 1', price: 100, description: 'Опис товару 1' }]));
+          localStorage.setItem('products', JSON.stringify([{ id: 1, name: 'Товар 1', count: 10, description: 'Опис товару 1' }]));
         }
         return mockUser;
       }
@@ -136,7 +136,7 @@ export const userApi = {
       const newProduct = {
         id: Math.floor(Math.random() * 1000),
         name: productData.name,
-        price: productData.count,
+        count: productData.count,
         description: productData.description,
         image: productData.image || 'https://via.placeholder.com/150',
         category: productData.category || 'Інше',

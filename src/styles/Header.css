@@ -1,0 +1,88 @@
+/* Header.css */
+
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #111827;
+  color: #fff;
+  padding: 15px 20px; 
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.4s ease;
+  z-index: 1000;
+}
+
+.app-header.hidden {
+  transform: translateY(-100%);
+}
+
+.app-header .logo {
+  font-size: 22px;
+  font-weight: 700;
+  color: #3b82f6;
+  text-decoration: none; 
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links li a,
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 15px;
+  border-radius: 6px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.nav-links li a {
+  color: #fff;
+}
+
+.nav-links li a:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.add-product-btn {
+  color: #fff; 
+  border: 2px solid #fff; 
+  padding: 8px 16px;
+  border-radius: 6px;
+  margin-right: 15px; 
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.add-product-btn:hover {
+  background-color: #2563eb; 
+  color: #fff; 
+  transform: translateY(-2px);
+}
+
+.logout-btn {
+  background-color: #ef4444;
+  border: none;
+  color: #fff;
+}
+
+.logout-btn:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+}

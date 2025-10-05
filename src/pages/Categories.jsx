@@ -1,51 +1,72 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { userApi, CATEGORIES } from '../api/userApi';
+import { useParams, Link } from 'react-router-dom';
+import { userApi } from '../api/userApi';
+import '../styles/Categories.css';
+import { FaLaptop, FaTshirt, FaAppleAlt, FaFootballBall, FaEllipsisH } from 'react-icons/fa';
+
+const CATEGORIES = ['Електроніка', 'Одяг', 'Їжа', 'Спорт', 'Інше'];
+
+const categoryIcons = {
+  'Електроніка': <FaLaptop size={50} />,
+  'Одяг': <FaTshirt size={50} />,
+  'Їжа': <FaAppleAlt size={50} />,
+  'Спорт': <FaFootballBall size={50} />,
+  'Інше': <FaEllipsisH size={50} />,
+};
 
 const Categories = () => {
   const { categoryName } = useParams();
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    userApi.getProducts().then((data) => {
-      console.log('Fetched products for category:', data);
-      if (categoryName) {
-        const filteredProducts = data.filter((product) => product.category === categoryName);
-        setProducts(filteredProducts);
-      } else {
-        setProducts(data); // Якщо категорія не вказана, показуємо всі
-      }
-    }).catch((error) => console.error('Error fetching products:', error));
+    userApi.getProducts()
+      .then((data) => {
+        if (categoryName) {
+          const filtered = data.filter(p => p.category === categoryName);
+          setProducts(filtered);
+        } else {
+          setProducts(data);
+        }
+      })
+      .catch(err => console.error('Error fetching products:', err));
   }, [categoryName]);
 
   return (
-    <div>
+    <div className="categories-container">
       <h2>Категорії</h2>
-      <ul>
-        {CATEGORIES.map((category) => (
-          <li key={category}>
-            <a href={`/categories/${category}`}>{category}</a>
+
+      <ul className="categories-nav">
+        {CATEGORIES.map(category => (
+          <li key={category} className="category-card">
+            <Link to={`/categories/${category}`}>
+              <div className="icon-wrapper">
+                {categoryIcons[category] || <FaEllipsisH size={50} />}
+              </div>
+              <span>{category}</span>
+            </Link>
           </li>
         ))}
       </ul>
-      <h3>Товари в категорії: {categoryName || 'Усі'}</h3>
+
+      <h3 className="category-title">
+        Товари в категорії: {categoryName || 'Усі'}
+      </h3>
+
       {products.length > 0 ? (
-        <ul>
-          {products.map((product) => (
-            <li key={product.id}>
+        <ul className="products-list">
+          {products.map(product => (
+            <li key={product.id} className="product-card">
               <h3>{product.name}</h3>
-              <p>Ціна: {product.price} грн</p>
+              <p>Кількість: {product.count} шт</p>
               <p>Опис: {product.description}</p>
-              {product.image && (
-                <img src={product.image} alt={product.name} style={{ width: '150px', height: '150px' }} />
-              )}
+              {product.image && <img src={product.image} alt={product.name} />}
               <p>Категорія: {product.category}</p>
               <p>Контакти: {product.contactInfo}</p>
             </li>
           ))}
         </ul>
       ) : (
-        <p>Товари в цій категорії відсутні.</p>
+        <p className="no-products">Товари в цій категорії відсутні.</p>
       )}
     </div>
   );

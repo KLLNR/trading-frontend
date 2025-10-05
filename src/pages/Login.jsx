@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import '../styles/Login.css'; 
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -11,10 +12,12 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (password.length < 8 || password.length > 16) {
       setError('Пароль має бути від 8 до 16 символів');
       return;
     }
+
     try {
       const result = await login({ email, password });
       if (result.success) {
@@ -29,7 +32,7 @@ const Login = () => {
   };
 
   return (
-    <div>
+    <div className="login-container">
       <h2>Логін</h2>
       <form onSubmit={handleSubmit}>
         <input
@@ -48,10 +51,13 @@ const Login = () => {
         />
         <button type="submit">Увійти</button>
       </form>
-        <p>Немає акаунту? <a href="/register">Зареєструватися</a></p>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      <p>
+        Немає акаунту? <a href="/register">Зареєструватися</a>
+      </p>
+
+      {error && <p className="error">{error}</p>}
     </div>
-    
   );
 };
 

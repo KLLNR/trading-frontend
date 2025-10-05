@@ -1,0 +1,73 @@
+.add-product-container {
+  max-width: 600px;
+  margin: 100px auto 50px; 
+  padding: 30px 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2c3e50;
+}
+
+.add-product-container h2 {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 25px;
+  font-weight: 600;
+  color: #007bff;
+}
+
+.add-product-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.add-product-container input,
+.add-product-container select {
+  padding: 10px 14px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.add-product-container input:focus,
+.add-product-container select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0,123,255,0.4);
+  outline: none;
+}
+
+.add-product-container button {
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-product-container button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.add-product-container input[type="file"] {
+  padding: 6px;
+}
+
+.add-product-container select {
+  cursor: pointer;
+}
+
+.add-product-container img {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
