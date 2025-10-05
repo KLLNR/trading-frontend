@@ -7,8 +7,9 @@ import Home from './pages/Home';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
 import AddProduct from './pages/AddProduct';
+import ProductDetail from './pages/ProductDetail'; 
 import Header from './components/Header';
-import Footer from './components/Footer'; 
+import Footer from './components/Footer';   
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -70,6 +71,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AddProduct />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Додано маршрут для ProductDetail */}
+              <Route
+                path="/product/:id"
+                element={
+                  <ProtectedRoute>
+                    <ProductDetail />
                   </ProtectedRoute>
                 }
               />

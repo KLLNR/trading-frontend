@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { userApi, CATEGORIES } from '../api/userApi';
 import '../styles/Products.css';
 
 const Products = () => {
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState([]);
   const [newProduct, setNewProduct] = useState({
     name: '',
-    price: 0,
+    count: 0,
     description: '',
-    image: '',
+    images: [], 
     category: '',
     contactInfo: '',
   });
+  const [previewImages, setPreviewImages] = useState([]); 
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(3);
 
@@ -21,20 +25,39 @@ const Products = () => {
       .catch((error) => console.error('Error fetching products:', error));
   }, []);
 
+
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setNewProduct({ ...newProduct, image: reader.result });
-      reader.readAsDataURL(file);
+    const files = Array.from(e.target.files);
+    if (files.length + newProduct.images.length > 5) {
+      alert('Максимум 5 фото!');
+      return;
     }
+
+    const readers = files.map(file => new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(file);
+    }));
+
+    Promise.all(readers).then(newImages => {
+      setNewProduct({ ...newProduct, images: [...newProduct.images, ...newImages] });
+      setPreviewImages([...previewImages, ...newImages]);
+    });
   };
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
     const result = await userApi.addProduct(newProduct);
     setProducts([...products, result]);
-    setNewProduct({ name: '', price: 0, description: '', image: '', category: '', contactInfo: '' });
+    setNewProduct({
+      name: '',
+      count: 0,
+      description: '',
+      images: [],
+      category: '',
+      contactInfo: '',
+    });
+    setPreviewImages([]);
     alert('Товар додано!');
   };
 
@@ -50,10 +73,17 @@ const Products = () => {
       {currentProducts.length > 0 ? (
         <ul className="products-list">
           {currentProducts.map(product => (
-            <li key={product.id} className="product-card">
-              {product.image && <img src={product.image} alt={product.name} />}
+            <li
+              key={product.id}
+              className="product-card"
+              onClick={() => navigate(`/product/${product.id}`)}
+              style={{ cursor: 'pointer' }} 
+            >
+              {product.images && product.images.length > 0 && (
+                <img src={product.images[0]} alt={product.name} />
+              )}
               <h3>{product.name}</h3>
-              <p>Ціна: {product.price} грн</p>
+              <p>Кількість: {product.count} шт</p>
               <p>Опис: {product.description}</p>
               <p>Категорія: {product.category}</p>
               <p>Контакти: {product.contactInfo}</p>
@@ -65,9 +95,13 @@ const Products = () => {
       )}
 
       <div className="pagination">
-        <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>Назад</button>
+        <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+          Назад
+        </button>
         <span>Сторінка {currentPage} з {totalPages}</span>
-        <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>Далі</button>
+        <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
+          Далі
+        </button>
       </div>
 
       <h3>Додати новий товар</h3>
@@ -81,9 +115,9 @@ const Products = () => {
         />
         <input
           type="number"
-          placeholder="Ціна"
-          value={newProduct.price}
-          onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
+          placeholder="Кількість"
+          value={newProduct.count}
+          onChange={(e) => setNewProduct({ ...newProduct, count: Number(e.target.value) })}
           required
         />
         <input
@@ -93,7 +127,15 @@ const Products = () => {
           onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
           required
         />
-        <input type="file" accept="image/*" onChange={handleFileChange} />
+
+        <input type="file" accept="image/*" multiple onChange={handleFileChange} />
+        <p>Завантажено фото: {newProduct.images.length} (макс. 5)</p>
+        <div className="preview-images">
+          {previewImages.map((img, index) => (
+            <img key={index} src={img} alt={`Попередній перегляд ${index + 1}`} className="preview-image" />
+          ))}
+        </div>
+
         <select
           value={newProduct.category}
           onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}

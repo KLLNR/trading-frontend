@@ -49,7 +49,16 @@ export const userApi = {
         localStorage.setItem('token', mockToken);
         localStorage.setItem('user', JSON.stringify(mockUser));
         if (!localStorage.getItem('products')) {
-          localStorage.setItem('products', JSON.stringify([{ id: 1, name: 'Товар 1', count: 10, description: 'Опис товару 1' }]));
+          localStorage.setItem('products', JSON.stringify([{
+            id: 1,
+            name: 'Товар 1',
+            count: 10,
+            description: 'Опис товару 1',
+            images: ['https://via.placeholder.com/150'],
+            category: 'Електроніка',
+            contactInfo: 'test@example.com',
+            ownerId: mockUser.id
+          }]));
         }
         return mockUser;
       }
@@ -123,7 +132,7 @@ export const userApi = {
   getProducts: async () => {
     if (USE_MOCK) {
       const storedProducts = JSON.parse(localStorage.getItem('products'));
-      console.log('Products from localStorage:', storedProducts); // Дебаг
+      console.log('Products from localStorage:', storedProducts);
       return storedProducts || [];
     }
     const response = await axiosClient.get('/api/products');
@@ -133,14 +142,16 @@ export const userApi = {
   addProduct: async (productData) => {
     if (USE_MOCK) {
       const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
+      const storedUser = JSON.parse(localStorage.getItem('user'));
       const newProduct = {
         id: Math.floor(Math.random() * 1000),
         name: productData.name,
         count: productData.count,
         description: productData.description,
-        image: productData.image || 'https://via.placeholder.com/150',
+        images: productData.images || ['https://via.placeholder.com/150'],
         category: productData.category || 'Інше',
         contactInfo: productData.contactInfo || 'Немає даних',
+        ownerId: storedUser.id, 
       };
       const updatedProducts = [...storedProducts, newProduct];
       localStorage.setItem('products', JSON.stringify(updatedProducts));

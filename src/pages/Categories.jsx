@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { userApi } from '../api/userApi';
 import '../styles/Categories.css';
 import { FaLaptop, FaTshirt, FaAppleAlt, FaFootballBall, FaEllipsisH } from 'react-icons/fa';
@@ -16,6 +16,7 @@ const categoryIcons = {
 
 const Categories = () => {
   const { categoryName } = useParams();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -55,11 +56,18 @@ const Categories = () => {
       {products.length > 0 ? (
         <ul className="products-list">
           {products.map(product => (
-            <li key={product.id} className="product-card">
+            <li
+              key={product.id}
+              className="product-card"
+              onClick={() => navigate(`/product/${product.id}`)} 
+              style={{ cursor: 'pointer' }} 
+            >
+              {product.images && product.images.length > 0 && (
+                <img src={product.images[0]} alt={product.name} />
+              )}
               <h3>{product.name}</h3>
               <p>Кількість: {product.count} шт</p>
               <p>Опис: {product.description}</p>
-              {product.image && <img src={product.image} alt={product.name} />}
               <p>Категорія: {product.category}</p>
               <p>Контакти: {product.contactInfo}</p>
             </li>
