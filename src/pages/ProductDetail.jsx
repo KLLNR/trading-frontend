@@ -22,7 +22,7 @@ const ProductDetail = () => {
 
   return (
     <div className="product-detail-container">
-      <Link to="/categories" className="back-link">← Назад до категорій</Link>
+      <Link to="/categories" className="back-link">← Назад</Link>
 
       <div className="product-detail-card">
         <div className="product-gallery">

@@ -48,12 +48,13 @@ const AddProduct = () => {
     });
     setPreviewImages([]);
   };  
-  
 
   return (
     <div className="add-product-container">
       <h2 className="add-product-title">Додати новий товар</h2>
       <form className="add-product-form" onSubmit={handleAddProduct}>
+
+        <span className="add-product-label">Вкажіть назву</span>
         <input
           className="add-product-input"
           type="text"
@@ -62,6 +63,8 @@ const AddProduct = () => {
           onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
           required
         />
+
+        <span className="add-product-label">Вкажіть кількість</span>
         <input
           className="add-product-input"
           type="number"
@@ -70,14 +73,22 @@ const AddProduct = () => {
           onChange={(e) => setNewProduct({ ...newProduct, count: Number(e.target.value) })}
           required
         />
-        <input
-          className="add-product-input"
-          type="text"
+
+        <span className="add-product-label">Опис товару</span>
+        <textarea
+          className="add-product-textarea"
           placeholder="Опис"
           value={newProduct.description}
           onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+          rows={5}
+          maxLength={9000}
           required
         />
+        <p className="add-product-charcount">
+          {newProduct.description.length} / 9000
+        </p>
+
+        <span className="add-product-label">Фото</span>
         <input
           className="add-product-file-input"
           type="file"
@@ -91,6 +102,8 @@ const AddProduct = () => {
             <img key={index} src={img} alt={`Попередній перегляд ${index + 1}`} className="preview-image" />
           ))}
         </div>
+
+        <span className="add-product-label">Категорія</span>
         <select
           className="add-product-select"
           value={newProduct.category}
@@ -102,14 +115,17 @@ const AddProduct = () => {
             <option key={category} value={category}>{category}</option>
           ))}
         </select>
+
+        <span className="add-product-label">Ваші контактні дані</span>
         <input
           className="add-product-input"
           type="text"
-          placeholder="Контактні дані (email/телефон)"
+          placeholder="email/телефон"
           value={newProduct.contactInfo}
           onChange={(e) => setNewProduct({ ...newProduct, contactInfo: e.target.value })}
           required
         />
+
         <button className="add-product-button" type="submit">Додати товар</button>
       </form>
     </div>

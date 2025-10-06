@@ -10,10 +10,13 @@ const Home = () => {
   const [previewAvatar, setPreviewAvatar] = useState(user?.avatar || '');
   const [userProducts, setUserProducts] = useState([]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(3); 
+
   const fetchUserProducts = useCallback(async () => {
     if (!user) return;
     const allProducts = await userApi.getProducts();
-    const myProducts = allProducts.filter((p) => p.ownerId === user.id); 
+    const myProducts = allProducts.filter((p) => p.ownerId === user.id);
     setUserProducts(myProducts);
   }, [user]);
 
@@ -40,7 +43,7 @@ const Home = () => {
       const result = await updateProfile(updatedData);
       if (result) {
         alert('Профіль оновлено!');
-        setEditFirstName(''); 
+        setEditFirstName('');
       }
     } catch (error) {
       console.error('Помилка оновлення профілю:', error);
@@ -49,6 +52,12 @@ const Home = () => {
   };
 
   if (!user) return <p style={{ textAlign: 'center' }}>Будь ласка, увійдіть.</p>;
+
+  // --- Пагінація ---
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = userProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(userProducts.length / productsPerPage);
 
   return (
     <div className="home-container">
@@ -62,6 +71,7 @@ const Home = () => {
           <p><strong>Адреса:</strong> {user.address?.street || '-'}, {user.address?.city || '-'}</p>
         </div>
       </div>
+
       <form className="edit-profile" onSubmit={handleUpdateProfile}>
         <input
           type="text"
@@ -75,24 +85,32 @@ const Home = () => {
         )}
         <button type="submit">Оновити профіль</button>
       </form>
+
       <h2>Мої товари</h2>
       {userProducts.length === 0 ? (
         <p>Ви ще не додали жодного товару.</p>
       ) : (
-        <div className="user-products">
-          {userProducts.map((product) => (
-            <Link key={product.id} to={`/product/${product.id}`} className="product-card-link">
-              <div className="product-card">
-                <h3>{product.name}</h3>
-                <p>{product.description}</p>
-                <p>Кількість: {product.count} шт</p>
-                {product.images[0] && (
-                  <img src={product.images[0]} alt={product.name} className="product-image" />
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
+        <>
+          <div className="user-products">
+            {currentProducts.map((product) => (
+              <Link key={product.id} to={`/product/${product.id}`} className="product-card-link">
+                <div className="product-card">
+                  <h3>{product.name}</h3>
+                  <p>Кількість: {product.count} шт</p>
+                  {product.images[0] && (
+                    <img src={product.images[0]} alt={product.name} className="product-image" />
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="pagination">
+            <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>Назад</button>
+            <span>Сторінка {currentPage} з {totalPages}</span>
+            <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>Далі</button>
+          </div>
+        </>
       )}
     </div>
   );
