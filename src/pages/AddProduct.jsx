@@ -1,109 +1,130 @@
 import React, { useState } from 'react';
 import { userApi, CATEGORIES } from '../api/userApi';
-import '../styles/AddProduct.css'; 
+import '../styles/AddProduct.css';
 
 const AddProduct = () => {
   const [newProduct, setNewProduct] = useState({
-    name: '',
-    count: 0,
+    title: '',
+    count: 1,
     description: '',
-    images: [], 
+    image_url: [],
     category: '',
     contactInfo: '',
+    is_for_trade: true,
+    is_for_sale: false,
+    price: '',
   });
-  const [previewImages, setPreviewImages] = useState([]); 
+
+  const [previewImages, setPreviewImages] = useState([]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length + newProduct.images.length > 5) {
+    if (files.length + newProduct.image_url.length > 5) {
       alert('Максимум 5 фото!');
       return;
     }
-    const readers = files.map((file) => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(file);
-      });
-    });
+
+    const readers = files.map((file) => new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(file);
+    }));
+
     Promise.all(readers).then((newImages) => {
-      setNewProduct({ ...newProduct, images: [...newProduct.images, ...newImages] });
-      setPreviewImages([...previewImages, ...newImages]);
+      setNewProduct(prev => ({ ...prev, image_url: [...prev.image_url, ...newImages] }));
+      setPreviewImages(prev => [...prev, ...newImages]);
     });
   };
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
+
     const currentUser = JSON.parse(localStorage.getItem('user'));
-    const productWithUser = { ...newProduct, userId: currentUser.id }; 
-    await userApi.addProduct(productWithUser);
-    alert('Товар додано!');
-    setNewProduct({
-      name: '',
-      count: 0,
-      description: '',
-      images: [],
-      category: '',
-      contactInfo: '',
-    });
-    setPreviewImages([]);
-  };  
+    if (!currentUser) {
+      alert('Будь ласка, увійдіть у систему.');
+      return;
+    }
+
+    const productToAdd = {
+      ...newProduct,
+      owner_id: currentUser.id,
+      price: newProduct.is_for_sale ? Number(newProduct.price) : 0,
+    };
+
+    try {
+      await userApi.addProduct(productToAdd);
+      alert('Товар додано!');
+
+      setNewProduct({
+        title: '',
+        count: 1,
+        description: '',
+        image_url: [],
+        category: '',
+        contactInfo: '',
+        is_for_trade: true,
+        is_for_sale: false,
+        price: '',
+      });
+      setPreviewImages([]);
+    } catch (error) {
+      console.error('Помилка при додаванні товару:', error);
+      alert('Помилка при додаванні товару');
+    }
+  };
 
   return (
     <div className="add-product-container">
       <h2 className="add-product-title">Додати новий товар</h2>
       <form className="add-product-form" onSubmit={handleAddProduct}>
-
-        <span className="add-product-label">Вкажіть назву</span>
+        <label className="add-product-label">Назва товару</label>
         <input
-          className="add-product-input"
           type="text"
+          className="add-product-input"
           placeholder="Назва товару"
-          value={newProduct.name}
-          onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+          value={newProduct.title}
+          onChange={(e) => setNewProduct({ ...newProduct, title: e.target.value })}
           required
         />
 
-        <span className="add-product-label">Вкажіть кількість</span>
+        <label className="add-product-label">Кількість</label>
         <input
-          className="add-product-input"
           type="number"
-          placeholder="Кількість"
+          className="add-product-input"
+          min="1"
           value={newProduct.count}
           onChange={(e) => setNewProduct({ ...newProduct, count: Number(e.target.value) })}
           required
         />
 
-        <span className="add-product-label">Опис товару</span>
+        <label className="add-product-label">Опис товару</label>
         <textarea
           className="add-product-textarea"
-          placeholder="Опис"
           value={newProduct.description}
           onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
           rows={5}
           maxLength={9000}
+          placeholder="Опис"
           required
         />
-        <p className="add-product-charcount">
-          {newProduct.description.length} / 9000
-        </p>
+        <p className="add-product-charcount">{newProduct.description.length} / 9000</p>
 
-        <span className="add-product-label">Фото</span>
+        <label className="add-product-label">Фото</label>
         <input
-          className="add-product-file-input"
           type="file"
+          className="add-product-file-input"
           accept="image/*"
-          multiple 
+          multiple
           onChange={handleFileChange}
         />
-        <p className="add-product-info">Завантажено фото: {newProduct.images.length} (макс. 5)</p>
+        <p className="add-product-info">Завантажено фото: {newProduct.image_url.length} (макс. 5)</p>
         <div className="preview-images">
-          {previewImages.map((img, index) => (
-            <img key={index} src={img} alt={`Попередній перегляд ${index + 1}`} className="preview-image" />
+          {previewImages.map((img, idx) => (
+            <img key={idx} src={img} alt={`Попередній перегляд ${idx + 1}`} className="preview-image" />
           ))}
         </div>
 
-        <span className="add-product-label">Категорія</span>
+        <label className="add-product-label">Категорія</label>
         <select
           className="add-product-select"
           value={newProduct.category}
@@ -111,22 +132,56 @@ const AddProduct = () => {
           required
         >
           <option value="" disabled>Оберіть категорію</option>
-          {CATEGORIES.map((category) => (
-            <option key={category} value={category}>{category}</option>
-          ))}
+          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
 
-        <span className="add-product-label">Ваші контактні дані</span>
+        <label className="add-product-label">Тип товару</label>
+        <div className="add-product-type">
+          <label>
+            <input
+              type="radio"
+              name="type"
+              checked={newProduct.is_for_trade}
+              onChange={() => setNewProduct({ ...newProduct, is_for_trade: true, is_for_sale: false, price: '' })}
+            />
+            На обмін
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="type"
+              checked={newProduct.is_for_sale}
+              onChange={() => setNewProduct({ ...newProduct, is_for_sale: true, is_for_trade: false })}
+            />
+            На продаж
+          </label>
+        </div>
+
+        {newProduct.is_for_sale && (
+          <>
+            <label className="add-product-label">Ціна (грн)</label>
+            <input
+              type="number"
+              min="1"
+              className="add-product-input"
+              value={newProduct.price}
+              onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+              required
+            />
+          </>
+        )}
+
+        <label className="add-product-label">Контактна інформація</label>
         <input
-          className="add-product-input"
           type="text"
-          placeholder="email/телефон"
+          className="add-product-input"
+          placeholder="email або телефон"
           value={newProduct.contactInfo}
           onChange={(e) => setNewProduct({ ...newProduct, contactInfo: e.target.value })}
           required
         />
 
-        <button className="add-product-button" type="submit">Додати товар</button>
+        <button type="submit" className="add-product-button">Додати товар</button>
       </form>
     </div>
   );

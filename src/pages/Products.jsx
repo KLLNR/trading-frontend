@@ -10,12 +10,15 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [newProduct, setNewProduct] = useState({
-    name: '',
+    title: '',
     count: 0,
     description: '',
-    images: [],
+    image_url: [],
     category: '',
     contactInfo: '',
+    is_for_trade: true,
+    is_for_sale: false,
+    price: '',
   });
   const [previewImages, setPreviewImages] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,26 +27,28 @@ const Products = () => {
   const queryParams = new URLSearchParams(location.search);
   const searchQuery = queryParams.get('search')?.toLowerCase() || '';
 
+  // === Отримання продуктів ===
   useEffect(() => {
     userApi.getProducts()
       .then((data) => {
         setProducts(data);
         if (searchQuery) {
           const filtered = data.filter(p =>
-            p.name.toLowerCase().includes(searchQuery) ||
-            (p.description && p.description.toLowerCase().includes(searchQuery))
+            p.title?.toLowerCase().includes(searchQuery) ||
+            p.description?.toLowerCase().includes(searchQuery)
           );
           setFilteredProducts(filtered);
         } else {
           setFilteredProducts(data);
-        }
+        }              
       })
       .catch((error) => console.error('Error fetching products:', error));
   }, [searchQuery]);
 
+  // === Зміна фото ===
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length + newProduct.images.length > 5) {
+    if (files.length + newProduct.image_url.length > 5) {
       alert('Максимум 5 фото!');
       return;
     }
@@ -55,28 +60,47 @@ const Products = () => {
     }));
 
     Promise.all(readers).then(newImages => {
-      setNewProduct({ ...newProduct, images: [...newProduct.images, ...newImages] });
+      setNewProduct({ ...newProduct, image_url: [...newProduct.image_url, ...newImages] });
       setPreviewImages([...previewImages, ...newImages]);
     });
   };
 
+  // === Додавання продукту ===
   const handleAddProduct = async (e) => {
     e.preventDefault();
-    const result = await userApi.addProduct(newProduct);
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+
+    if (!currentUser) {
+      alert('Будь ласка, увійдіть у систему.');
+      return;
+    }
+
+    const productWithUser = {
+      ...newProduct,
+      owner_id: currentUser.id,
+      price: newProduct.is_for_sale ? Number(newProduct.price) : 0,
+    };
+
+    const result = await userApi.addProduct(productWithUser);
+
     setProducts([...products, result]);
     setFilteredProducts([...filteredProducts, result]);
     setNewProduct({
-      name: '',
+      title: '',
       count: 0,
       description: '',
-      images: [],
+      image_url: [],
       category: '',
       contactInfo: '',
+      is_for_trade: true,
+      is_for_sale: false,
+      price: '',
     });
     setPreviewImages([]);
     alert('Товар додано!');
   };
 
+  // === Пагінація ===
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
@@ -84,7 +108,7 @@ const Products = () => {
 
   return (
     <div className="products-container">
-      <h2>Сторінка товарів</h2>
+      <h2>Товари</h2>
 
       {currentProducts.length > 0 ? (
         <ul className="products-list">
@@ -95,12 +119,19 @@ const Products = () => {
               onClick={() => navigate(`/product/${product.id}`)}
               style={{ cursor: 'pointer' }}
             >
-              {product.images && product.images.length > 0 && (
-                <img src={product.images[0]} alt={product.name} />
+              {product.image_url && product.image_url.length > 0 && (
+                <img src={product.image_url[0]} alt={product.title} />
               )}
-              <h3>{product.name}</h3>
+              <h3>{product.title}</h3>
               <p>Кількість: {product.count} шт</p>
               <p>Категорія: {product.category}</p>
+
+              {product.is_for_sale ? (
+                <p className="product-price">Ціна: {product.price} грн</p>
+              ) : (
+                <p className="product-exchange">На обмін</p>
+              )}
+
               <p>Контакти: {product.contactInfo}</p>
             </li>
           ))}
@@ -115,20 +146,21 @@ const Products = () => {
         <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>Далі</button>
       </div>
 
+      {/* === Додавання нового товару === */}
       <div className="add-product-container">
         <h2>Додати новий товар</h2>
         <form onSubmit={handleAddProduct}>
 
-          <span className="add-product-label">Вкажіть назву</span>
+          <span className="add-product-label">Назва</span>
           <input
             type="text"
             placeholder="Назва товару"
-            value={newProduct.name}
-            onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+            value={newProduct.title}
+            onChange={(e) => setNewProduct({ ...newProduct, title: e.target.value })}
             required
           />
 
-          <span className="add-product-label">Вкажіть кількість</span>
+          <span className="add-product-label">Кількість</span>
           <input
             type="number"
             min={1}
@@ -138,9 +170,9 @@ const Products = () => {
             required
           />
 
-          <span className="add-product-label">Опис товару</span>
+          <span className="add-product-label">Опис</span>
           <textarea
-            placeholder="Опис"
+            placeholder="Опис товару"
             value={newProduct.description}
             onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
             rows={5}
@@ -148,6 +180,43 @@ const Products = () => {
             required
           />
           <p className="add-product-charcount">{newProduct.description.length} / 9000</p>
+
+          <span className="add-product-label">Тип товару</span>
+          <div className="type-options">
+            <label>
+              <input
+                type="radio"
+                name="type"
+                value="sell"
+                checked={newProduct.is_for_sale}
+                onChange={() => setNewProduct({ ...newProduct, is_for_sale: true, is_for_trade: false })}
+              />
+              На продаж
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="type"
+                value="exchange"
+                checked={newProduct.is_for_trade}
+                onChange={() => setNewProduct({ ...newProduct, is_for_trade: true, is_for_sale: false, price: '' })}
+              />
+              На обмін
+            </label>
+          </div>
+
+          {newProduct.is_for_sale && (
+            <>
+              <span className="add-product-label">Ціна (грн)</span>
+              <input
+                type="number"
+                placeholder="Вкажіть ціну"
+                value={newProduct.price}
+                onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                required
+              />
+            </>
+          )}
 
           <span className="add-product-label">Фото</span>
           <input
@@ -172,7 +241,7 @@ const Products = () => {
             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
 
-          <span className="add-product-label">Ваші контактні дані</span>
+          <span className="add-product-label">Контактна інформація</span>
           <input
             type="text"
             placeholder="email/телефон"
@@ -181,7 +250,7 @@ const Products = () => {
             required
           />
 
-          <button type="submit">Додати товар</button>
+          <button type="submit" className="add-product-button">Додати товар</button>
         </form>
       </div>
     </div>

@@ -11,13 +11,11 @@ const Header = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScroll = window.scrollY;
-
       if (currentScroll > lastScroll && currentScroll > 80) {
         setHidden(true);
       } else {
         setHidden(false);
       }
-
       setLastScroll(currentScroll);
     };
 
@@ -30,20 +28,23 @@ const Header = () => {
       <Link to="/categories" className="logo">Trading-Auction</Link>
 
       <nav>
-      <ul className="nav-links">
-  {user && (
-    <li><Link to="/add-product" className="add-product-btn">Додати товар</Link></li>
-  )}
-  <li><Link to="/categories">Головна</Link></li>
-  <li><Link to="/products">Товари</Link></li>
-  <li><Link to="/">Профіль</Link></li>
-  {user && (
-    <li>
-      <button onClick={logout} className="logout-btn">Вийти</button>
-    </li>
-  )}
-</ul>
-
+        <ul className="nav-links">
+          {user && <li><Link to="/add-product" className="add-product-btn">Додати товар</Link></li>}
+          <li><Link to="/categories">Головна</Link></li>
+          <li><Link to="/products">Товари</Link></li>
+          {user && (
+            <>
+              <li><Link to="/exchange/incoming">Вхідні обміни</Link></li>
+              <li><Link to="/exchange/outgoing">Мої пропозиції</Link></li>
+            </>
+          )}
+          <li><Link to="/">Профіль</Link></li>
+          {user && (
+            <li>
+              <button onClick={logout} className="logout-btn">Вийти</button>
+            </li>
+          )}
+        </ul>
       </nav>
     </header>
   );

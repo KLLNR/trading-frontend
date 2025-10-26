@@ -16,9 +16,10 @@ const Home = () => {
   const fetchUserProducts = useCallback(async () => {
     if (!user) return;
     const allProducts = await userApi.getProducts();
-    const myProducts = allProducts.filter((p) => p.ownerId === user.id);
+    const myProducts = allProducts.filter((p) => p.owner_id === user.id);
     setUserProducts(myProducts);
   }, [user]);
+  
 
   useEffect(() => {
     fetchUserProducts();
@@ -53,7 +54,6 @@ const Home = () => {
 
   if (!user) return <p style={{ textAlign: 'center' }}>Будь ласка, увійдіть.</p>;
 
-  // --- Пагінація ---
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = userProducts.slice(indexOfFirstProduct, indexOfLastProduct);
@@ -63,7 +63,7 @@ const Home = () => {
     <div className="home-container">
       <h1>Профіль користувача</h1>
       <div className="user-info">
-        {user.avatar && <img src={user.avatar} alt="Аватар" className="user-avatar" />}
+        {user.avatar && <img src={user.avatar} alt="" className="user-avatar" />}
         <div className="user-details">
           <p><strong>Ім’я:</strong> {user.firstName} {user.lastName}</p>
           <p><strong>Email:</strong> {user.email}</p>
@@ -73,18 +73,32 @@ const Home = () => {
       </div>
 
       <form className="edit-profile" onSubmit={handleUpdateProfile}>
-        <input
-          type="text"
-          placeholder="Нове ім’я"
-          value={editFirstName}
-          onChange={(e) => setEditFirstName(e.target.value)}
-        />
-        <input type="file" accept="image/*" onChange={handleFileChange} />
-        {previewAvatar && (
-          <img src={previewAvatar} alt="Попередній перегляд аватара" className="preview-avatar" />
-        )}
-        <button type="submit">Оновити профіль</button>
-      </form>
+  <h3 className="edit-profile-title">Редагування профілю</h3>
+
+  <label htmlFor="firstName" className="edit-label">Нове ім’я:</label>
+  <input
+    id="firstName"
+    type="text"
+    placeholder="Введіть нове ім’я"
+    value={editFirstName}
+    onChange={(e) => setEditFirstName(e.target.value)}
+  />
+
+  <label htmlFor="avatarUpload" className="edit-label">Оновити аватар:</label>
+  <input
+    id="avatarUpload"
+    type="file"
+    accept="image/*"
+    onChange={handleFileChange}
+  />
+
+  {previewAvatar && (
+    <img src={previewAvatar} alt="" className="preview-avatar" />
+  )}
+
+  <button type="submit" className="update-btn">Оновити профіль</button>
+</form>
+
 
       <h2>Мої товари</h2>
       {userProducts.length === 0 ? (
@@ -92,18 +106,23 @@ const Home = () => {
       ) : (
         <>
           <div className="user-products">
-            {currentProducts.map((product) => (
-              <Link key={product.id} to={`/product/${product.id}`} className="product-card-link">
-                <div className="product-card">
-                  <h3>{product.name}</h3>
-                  <p>Кількість: {product.count} шт</p>
-                  {product.images[0] && (
-                    <img src={product.images[0]} alt={product.name} className="product-image" />
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
+  {currentProducts.map((product) => (
+    <Link key={product.id} to={`/product/${product.id}`} className="product-card-link">
+      <div className="product-card">
+        <h3>{product.title}</h3>
+        {product.image_url?.[0] && (
+          <img src={product.image_url[0]} alt={product.title} className="product-image" />
+        )}
+        {product.is_for_sale ? (
+          <p className="price">Ціна: {product.price} грн</p>
+        ) : (
+          <p className="exchange">На обмін</p>
+        )}
+      </div>
+    </Link>
+  ))}
+</div>
+
 
           <div className="pagination">
             <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>Назад</button>

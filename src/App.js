@@ -10,6 +10,10 @@ import AddProduct from './pages/AddProduct';
 import ProductDetail from './pages/ProductDetail'; 
 import Header from './components/Header';
 import Footer from './components/Footer';   
+import ExchangePropose from './pages/ExchangePropose';
+import ExchangeDetail from './pages/ExchangeDetail';
+import ExchangeIncoming from './pages/ExchangeIncoming';
+import ExchangeOutgoing from './pages/ExchangeOutgoing';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -42,6 +46,7 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+
               <Route
                 path="/"
                 element={
@@ -50,6 +55,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/products"
                 element={
@@ -58,6 +64,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/categories/:categoryName?"
                 element={
@@ -66,6 +73,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/add-product"
                 element={
@@ -74,12 +82,45 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              {/* Додано маршрут для ProductDetail */}
+
               <Route
                 path="/product/:id"
                 element={
                   <ProtectedRoute>
                     <ProductDetail />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/exchange/propose/:productId"
+                element={
+                  <ProtectedRoute>
+                    <ExchangePropose />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/exchange/:id"
+                element={
+                  <ProtectedRoute>
+                    <ExchangeDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/exchange/incoming"
+                element={
+                  <ProtectedRoute>
+                    <ExchangeIncoming />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/exchange/outgoing"
+                element={
+                  <ProtectedRoute>
+                    <ExchangeOutgoing />
                   </ProtectedRoute>
                 }
               />

@@ -1,37 +1,62 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../styles/Register.css'; 
+import '../styles/Register.css';
 
 const Register = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [address, setAddress] = useState({ street: '', city: '' });
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: '',
+    firstName: '',
+    lastName: '',
+    address: {
+      country: '',
+      city: '',
+      postalCode: '',
+      street: ''
+    }
+  });
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (['country', 'city', 'postalCode', 'street'].includes(name)) {
+      setFormData((prev) => ({
+        ...prev,
+        address: {
+          ...prev.address,
+          [name]: value
+        }
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const { password, confirmPassword } = formData;
 
     if (password.length < 8 || password.length > 16) {
       setError('Пароль має бути від 8 до 16 символів');
       return;
     }
 
-    const signUpData = {
-      email,
-      password,
-      phone,
-      firstName,
-      lastName,
-      address,
-    };
+    if (password !== confirmPassword) {
+      setError('Паролі не співпадають');
+      return;
+    }
 
-    const result = await register(signUpData);
+    console.log('Sending registration data:', formData); // Додаємо для дебагу
+    const result = await register(formData);
+    console.log('Registration result:', result); // Додаємо для дебагу
 
     if (result.success) {
       navigate('/');
@@ -46,60 +71,89 @@ const Register = () => {
       <form onSubmit={handleSubmit}>
         <input
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
           placeholder="Email"
           required
         />
         <input
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
           placeholder="Пароль"
           required
         />
         <input
+          type="password"
+          name="confirmPassword"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          placeholder="Підтвердіть пароль"
+          required
+        />
+        <input
           type="text"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
           placeholder="Телефон"
           required
         />
         <input
           type="text"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
+          name="firstName"
+          value={formData.firstName}
+          onChange={handleChange}
           placeholder="Ім'я"
           required
         />
         <input
           type="text"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
+          name="lastName"
+          value={formData.lastName}
+          onChange={handleChange}
           placeholder="Прізвище"
           required
         />
         <input
           type="text"
-          value={address.street}
-          onChange={(e) => setAddress({ ...address, street: e.target.value })}
-          placeholder="Вулиця"
+          name="country"
+          value={formData.address.country}
+          onChange={handleChange}
+          placeholder="Країна"
           required
         />
         <input
           type="text"
-          value={address.city}
-          onChange={(e) => setAddress({ ...address, city: e.target.value })}
+          name="city"
+          value={formData.address.city}
+          onChange={handleChange}
           placeholder="Місто"
+          required
+        />
+        <input
+          type="text"
+          name="postalCode"
+          value={formData.address.postalCode}
+          onChange={handleChange}
+          placeholder="Поштовий індекс"
+          required
+        />
+        <input
+          type="text"
+          name="street"
+          value={formData.address.street}
+          onChange={handleChange}
+          placeholder="Вулиця"
           required
         />
         <button type="submit">Зареєструватися</button>
       </form>
-
       <p>
         Вже маєте акаунт? <a href="/login">Увійти</a>
       </p>
-
       {error && <p className="error">{error}</p>}
     </div>
   );
