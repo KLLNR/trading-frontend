@@ -1,0 +1,124 @@
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #2c3e50;
+    --text-color: #333;
+    --bg-light: #f8f9fa;
+    --card-bg: #ffffff;
+    --card-shadow: rgba(0, 0, 0, 0.08);
+    --border-radius: 10px;
+    --transition-speed: 0.3s;
+  }
+  
+  /* Контейнер */
+  .exchange-outgoing-container {
+    max-width: 1000px;
+    margin: 60px auto;
+    padding: 40px 20px;
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius);
+    animation: fade-slide 0.6s ease;
+  }
+  
+  .exchange-outgoing-container h1 {
+    text-align: center;
+    color: var(--secondary-color);
+    margin-bottom: 40px;
+    font-size: 30px;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 10px;
+  }
+  
+  /* Список */
+  .exchange-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 25px;
+  }
+  
+  /* Картка */
+  .exchange-item {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px var(--card-shadow);
+    padding: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    animation: fade-slide 0.5s ease forwards;
+  }
+  
+  .exchange-item:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 18px var(--card-shadow);
+  }
+  
+  /* Деталі */
+  .exchange-details p {
+    margin: 6px 0;
+    color: var(--text-color);
+    font-size: 15px;
+  }
+  
+  .exchange-details .status {
+    font-weight: 600;
+    margin-top: 10px;
+  }
+  
+  .status.PENDING {
+    color: orange;
+  }
+  
+  .status.ACCEPTED {
+    color: green;
+  }
+  
+  .status.REJECTED {
+    color: red;
+  }
+  
+  .status.COMPLETED {
+    color: var(--primary-color);
+  }
+  
+  /* Посилання */
+  .view-link {
+    text-decoration: none;
+    background-color: var(--secondary-color);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-speed);
+    font-weight: 600;
+    text-align: center;
+    display: inline-block;
+    box-shadow: 0 4px 10px var(--card-shadow);
+  }
+  
+  .view-link:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px var(--card-shadow);
+  }
+  
+  /* Повідомлення */
+  .exchange-message {
+    text-align: center;
+    font-size: 18px;
+    color: #6c757d;
+    margin-top: 30px;
+  }
+  
+  /* Анімація */
+  @keyframes fade-slide {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  

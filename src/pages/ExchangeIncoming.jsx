@@ -1,52 +1,74 @@
 import React, { useEffect, useState } from 'react';
 import userApi from '../api/userApi';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import '../styles/ExchangeIncoming.css';
+
+const statusLabels = {
+  PENDING: 'В очікуванні',
+  ACCEPTED: 'Прийнято',
+  REJECTED: 'Відхилено',
+  COMPLETED: 'Завершено'
+};
 
 const ExchangeIncoming = () => {
+  const { user, loading } = useAuth();
   const [exchanges, setExchanges] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    userApi.getIncomingExchanges().then((data) => {
-      setExchanges(data);
-      setLoading(false);
-    });
-  }, []);
+    if (!user?.id) return;
+    const load = async () => {
+      setProducts(await userApi.getProducts());
+      setExchanges(await userApi.getIncomingExchanges());
+    };
+    load();
+  }, [user?.id]);
 
-  const handleAccept = async (id) => {
-    const updated = await userApi.acceptExchange(id);
-    setExchanges((prev) =>
-      prev.map((e) => (e.id === id ? updated : e))
-    );
-  };
+  if (loading) return <p className="exchange-message">Завантаження...</p>;
+  if (!user) return <p className="exchange-message">Спочатку увійдіть у профіль</p>;
 
-  const handleReject = async (id) => {
-    const updated = await userApi.rejectExchange(id);
-    setExchanges((prev) =>
-      prev.map((e) => (e.id === id ? updated : e))
-    );
-  };
-
-  if (loading) return <p>Завантаження...</p>;
+  const getProductName = (id) =>
+    products.find((p) => p.id === id)?.title || 'Без назви';
 
   return (
-    <div>
+    <div className="exchange-incoming-container">
       <h1>Вхідні пропозиції обміну</h1>
-      {exchanges.length === 0 && <p>Немає пропозицій</p>}
-      <ul>
+
+      <ul className="exchange-list">
+        {exchanges.length === 0 && (
+          <p className="exchange-message">Немає вхідних пропозицій</p>
+        )}
+
         {exchanges.map((e) => (
-          <li key={e.id} style={{ marginBottom: '20px' }}>
-            <p>Від користувача: {e.from_user_id}</p>
-            <p>Твій товар: {e.product_to_id}</p>
-            <p>Його товар: {e.product_from_id}</p>
-            <p>Статус: {e.status}</p>
-            {e.status === 'PENDING' && (
-              <>
-                <button onClick={() => handleAccept(e.id)}>Прийняти</button>
-                <button onClick={() => handleReject(e.id)}>Відхилити</button>
-              </>
-            )}
-            <Link to={`/exchange/${e.id}`}>Переглянути деталі</Link>
+          <li key={e.id} className={`exchange-item fade-in`}>
+            <div className="exchange-details">
+              <p><strong>Твій товар:</strong> {getProductName(e.product_to_id)}</p>
+              <p><strong>Його товар:</strong> {getProductName(e.product_from_id)}</p>
+              <p className={`status ${e.status}`}>{statusLabels[e.status]}</p>
+            </div>
+
+            <div className="exchange-actions">
+              {e.status === 'PENDING' && (
+                <>
+                  <button
+                    onClick={() => userApi.acceptExchange(e.id)}
+                    className="accept"
+                  >
+                    Прийняти
+                  </button>
+                  <button
+                    onClick={() => userApi.rejectExchange(e.id)}
+                    className="reject"
+                  >
+                    Відхилити
+                  </button>
+                </>
+              )}
+              <Link to={`/exchange/${e.id}`} className="view-link">
+                Переглянути
+              </Link>
+            </div>
           </li>
         ))}
       </ul>

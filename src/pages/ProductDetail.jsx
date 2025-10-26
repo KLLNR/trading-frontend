@@ -24,7 +24,7 @@ const ProductDetail = () => {
   if (!product) return <p className="loading-text">Завантаження...</p>;
 
   // не показуємо кнопку обміну для свого товару
-  const canProposeExchange = product.owner_id !== currentUser.id;
+const canProposeExchange = currentUser && product.owner_id !== currentUser.id;
 
   return (
     <div className="product-detail-container">

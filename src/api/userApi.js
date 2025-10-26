@@ -56,25 +56,28 @@ export const userApi = {
         localStorage.setItem('token', mockToken);
         localStorage.setItem('user', JSON.stringify(mockUser));
 
-        if (!localStorage.getItem('products')) {
-          localStorage.setItem(
-            'products',
-            JSON.stringify([
-              {
-                id: 1,
-                title: 'Товар 1',
-                description: 'Опис товару 1',
-                image_url: ['https://via.placeholder.com/150'],
-                category: 'Електроніка',
-                contactInfo: 'test@example.com',
-                owner_id: mockUser.id,
-                is_for_sale: true,
-                is_for_trade: true,
-                price: 100,
-              },
-            ])
-          );
-        }
+if (!localStorage.getItem('products')) {
+  const mockUser = { id: 1, name: 'Test User' };
+
+  localStorage.setItem(
+    'products',
+    JSON.stringify([
+      {
+        id: 1,
+        title: 'Навушники Sony WH-1000XM4',
+        description: 'Бездротові навушники з шумозаглушенням та високою якістю звуку.',
+        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800',
+        category: 'Електроніка',
+        contactInfo: 'test@example.com',
+        owner_id: mockUser.id,
+        is_for_sale: true,
+        is_for_trade: true,
+        price: 4500,
+      },
+    ])
+  );
+}
+
 
         return mockUser;
       }
@@ -96,8 +99,6 @@ export const userApi = {
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('exchanges');
-    localStorage.removeItem('products');
   },
 
   getProfile: async () => {
@@ -149,6 +150,57 @@ export const userApi = {
       throw error.response?.data?.message || 'Помилка оновлення адреси';
     }
   },
+
+  getMyProducts: async () => {
+    if (USE_MOCK) {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) throw new Error('Користувач не знайдений');
+      const all = JSON.parse(localStorage.getItem('products')) || [];
+      return all.filter(p => p.owner_id === user.id);
+    }
+  
+    const response = await axiosClient.get('/products/my');
+    return response.data;
+  },
+  
+  createExchange: async (payload) => {
+    if (USE_MOCK) {
+      const storedExchanges = JSON.parse(localStorage.getItem('exchanges')) || [];
+      const newExchange = {
+        id: Math.floor(Math.random() * 100000),
+        from_user_id: JSON.parse(localStorage.getItem('user')).id,
+        to_user_id: payload.to_user_id,
+        product_from_id: payload.product_from_id,
+        product_to_id: payload.product_to_id,
+        status: 'PENDING',
+        created_at: new Date().toISOString(),
+      };
+      localStorage.setItem('exchanges', JSON.stringify([...storedExchanges, newExchange]));
+      return newExchange;
+    }
+  
+    const response = await axiosClient.post('/exchange/propose', payload);
+    return response.data;
+  },
+  
+
+  getProductById: async (productId) => {
+    if (USE_MOCK) {
+      const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
+      const product = storedProducts.find((p) => p.id === Number(productId));
+      if (!product) throw new Error('Товар не знайдено');
+      return product;
+    }
+  
+    try {
+      const response = await axiosClient.get(`/products/${productId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Get product by ID error:', error.response?.data || error.message);
+      throw error.response?.data?.message || 'Помилка отримання товару';
+    }
+  },
+  
 
   getProducts: async () => {
     if (USE_MOCK) return JSON.parse(localStorage.getItem('products')) || [];
@@ -281,19 +333,15 @@ export const userApi = {
   getExchangeById: async (id) => {
     if (USE_MOCK) {
       const exchanges = JSON.parse(localStorage.getItem('exchanges')) || [];
-      const exchange = exchanges.find((e) => e.id === id);
+      const exchange = exchanges.find((e) => Number(e.id) === Number(id)); // 🔥 порівняння типів
       if (!exchange) throw new Error('Обмін не знайдено');
       return exchange;
     }
   
-    try {
-      const response = await axiosClient.get(`/exchange/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error('Get exchange by ID error:', error.response?.data || error.message);
-      throw error.response?.data?.message || 'Помилка отримання деталей обміну';
-    }
+    const response = await axiosClient.get(`/exchange/${id}`);
+    return response.data;
   },
+  
   
 
   getIncomingExchanges: async () => {
