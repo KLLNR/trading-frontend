@@ -1,84 +1,87 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { userApi } from '../api/userApi';
+  import React, { createContext, useState, useEffect } from 'react';
+  import { userApi } from '../api/userApi';
 
-export const AuthContext = createContext();
+  export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-        } catch (error) {
-          console.error('Error parsing user from localStorage:', error);
-          localStorage.removeItem('user');
+    useEffect(() => {
+      const initializeAuth = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            // userApi.js вже має axiosClient, який автоматично додає токен у заголовки
+            // Ми просто перевіряємо, чи токен ще дійсний, отримавши профіль
+            const userProfile = await userApi.getProfile();
+            setUser(userProfile);
+            // Оновлюємо localStorage свіжими даними
+            localStorage.setItem('user', JSON.stringify(userProfile));
+          } catch (error) {
+            // Якщо getProfile() повертає 401 або іншу помилку, токен недійсний
+            console.error('Auth initialization error:', error);
+            userApi.logout(); // Видаляємо невалідний токен і дані
+            setUser(null);
+          }
         }
+        // Встановлюємо loading(false) ТІЛЬКИ ПІСЛЯ завершення перевірки
+        setLoading(false);
+      };
+      initializeAuth();
+    }, []);
+
+    const register = async (signUpData) => {
+      try {
+        // Тепер userApi.register повертає user напряму або кидає помилку
+        const user = await userApi.register(signUpData);
+    
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+        return { success: true };
+      } catch (error) {
+        console.error('Register error:', error);
+        throw new Error(error.message || 'Помилка реєстрації');
       }
-      setLoading(false);
     };
-    initializeAuth();
-  }, []);
+    
 
-  const register = async (signUpData) => {
-    try {
-      const user = await userApi.register(signUpData);
-      setUser(user);
-      localStorage.setItem('user', JSON.stringify(user));
-      return { success: true };
-    } catch (error) {
-      console.error('Register error:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-      return { success: false, error: error.response?.data?.message || 'Помилка реєстрації' };
-    }
+    const login = async (signInData) => {
+      try {
+        const user = await userApi.login(signInData); // Тепер отримуємо user напряму
+    
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+        return { success: true };
+      } catch (error) {
+        console.error('Login error:', error);
+        throw new Error(error.message || 'Невірний email або пароль');
+      }
+    };
+
+    const logout = () => {
+      userApi.logout();
+      setUser(null);
+      localStorage.removeItem('user');
+    };
+
+    const updateProfile = async (profileData) => {
+      try {
+        const updatedUser = await userApi.updateProfile(profileData);
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return updatedUser;
+      } catch (error) {
+        console.error('Update profile error:', error);
+        throw error;
+      }
+    };
+
+    return (
+      <AuthContext.Provider value={{ user, register, login, logout, updateProfile, loading }}>
+        {children}
+      </AuthContext.Provider>
+    );
   };
 
-  const login = async (signInData) => {
-    try {
-      const user = await userApi.login(signInData);
-      setUser(user);
-      localStorage.setItem('user', JSON.stringify(user));
-      return { success: true };
-    } catch (error) {
-      console.error('Login error:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-      return { success: false, error: error.response?.data?.message || 'Помилка логіну' };
-    }
-  };
-
-  const logout = () => {
-    userApi.logout();
-    setUser(null);
-    localStorage.removeItem('user');
-  };
-
-  const updateProfile = async (profileData) => {
-    try {
-      const updatedUser = await userApi.updateProfile(profileData);
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      return updatedUser;
-    } catch (error) {
-      console.error('Update profile error:', error);
-      throw error;
-    }
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, register, login, logout, updateProfile, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuth = () => React.useContext(AuthContext);
+  export const useAuth = () => React.useContext(AuthContext);

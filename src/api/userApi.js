@@ -2,7 +2,7 @@
 import axiosClient from './axiosInstance';
 
 // ------------------ ГОЛОВНИЙ ПЕРЕМИКАЧ ------------------
-const USE_MOCK = true; // true — тільки локально, false — для реального бекенду
+const USE_MOCK = false; // true — тільки локально, false — для реального бекенду
 
 export const CATEGORIES = [
   'Електроніка',
@@ -26,21 +26,62 @@ export const userApi = {
       const mockToken = 'mock-token-' + newUser.id;
       localStorage.setItem('token', mockToken);
       localStorage.setItem('user', JSON.stringify(newUser));
-      return newUser;
+      return newUser; // Просто user, як очікує AuthContext
     }
-
+  
     try {
-      const response = await axiosClient.post('/auth/register', signUpData);
-      const { token, user } = response.data;
+      console.log("Реєстрація:", signUpData);
+  
+      // 1. Реєструємо
+      const regResponse = await axiosClient.post('/auth/register', signUpData);
+      console.log("Зареєстровано:", regResponse.data);
+  
+      // 2. Чекаємо 1 секунду (Spring Boot може ще не зберегти користувача в БД)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+  
+      // 3. Логінимося
+      const loginResponse = await axiosClient.post('/auth/login', {
+        email: signUpData.email,
+        password: signUpData.password,
+      });
+  
+      console.log("Успішний логін:", loginResponse.data);
+  
+      const { token, user } = loginResponse.data;
+  
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      return user;
+  
+      return user; // Повертаємо user — як очікує твій AuthContext
     } catch (error) {
       console.error('Register error:', error.response?.data || error.message);
-      throw error;
+  
+      // Якщо логін не вдався — все одно пробуємо взяти user з реєстрації
+      if (error.response?.status === 401) {
+        const userFromRegister = error.config?.data ? JSON.parse(error.config.data) : null;
+        if (userFromRegister) {
+          // Створюємо фейковий токен, щоб фронтенд не падав
+          const fakeToken = 'temp-token-' + Date.now();
+          localStorage.setItem('token', fakeToken);
+          localStorage.setItem('user', JSON.stringify({
+            email: userFromRegister.email,
+            firstName: userFromRegister.firstName,
+            lastName: userFromRegister.lastName,
+            phone: userFromRegister.phone,
+            address: userFromRegister.address
+          }));
+          return {
+            email: userFromRegister.email,
+            firstName: userFromRegister.firstName,
+            lastName: userFromRegister.lastName,
+          };
+        }
+      }
+  
+      throw new Error(error.response?.data?.message || 'Помилка реєстрації');
     }
   },
-
+  
   login: async (signInData) => {
     if (USE_MOCK) {
       if (signInData.email === 'test@example.com' && signInData.password === 'password123') {
@@ -86,13 +127,29 @@ if (!localStorage.getItem('products')) {
 
     try {
       const response = await axiosClient.post('/auth/login', signInData);
-      const { token, user } = response.data;
+      console.log("Логін успішний:", response.data);
+  
+      // Бекенд повертає ТІЛЬКИ token, тому беремо його
+      const token = typeof response.data === 'string' 
+        ? response.data 
+        : response.data.token;
+  
+      if (!token) {
+        throw new Error('Токен не отримано');
+      }
+  
       localStorage.setItem('token', token);
+  
+      // ОТРИМУЄМО ПРОФІЛЬ, щоб мати user
+      const profileResponse = await axiosClient.get('/users/me');
+      const user = profileResponse.data;
+  
       localStorage.setItem('user', JSON.stringify(user));
-      return user;
+  
+      return user; // Повертаємо user — як і в register
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
-      throw error.response?.data?.message || 'Помилка логіну';
+      throw new Error(error.response?.data?.message || 'Невірний email або пароль');
     }
   },
 

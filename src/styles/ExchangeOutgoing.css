@@ -9,7 +9,6 @@
     --transition-speed: 0.3s;
   }
   
-  /* Контейнер */
   .exchange-outgoing-container {
     max-width: 1000px;
     margin: 60px auto;
@@ -28,7 +27,6 @@
     padding-bottom: 10px;
   }
   
-  /* Список */
   .exchange-list {
     list-style: none;
     padding: 0;
@@ -36,7 +34,6 @@
     gap: 25px;
   }
   
-  /* Картка */
   .exchange-item {
     background-color: var(--card-bg);
     border-radius: var(--border-radius);
@@ -54,7 +51,6 @@
     box-shadow: 0 8px 18px var(--card-shadow);
   }
   
-  /* Деталі */
   .exchange-details p {
     margin: 6px 0;
     color: var(--text-color);
@@ -82,7 +78,6 @@
     color: var(--primary-color);
   }
   
-  /* Посилання */
   .view-link {
     text-decoration: none;
     background-color: var(--secondary-color);
@@ -102,7 +97,6 @@
     box-shadow: 0 6px 14px var(--card-shadow);
   }
   
-  /* Повідомлення */
   .exchange-message {
     text-align: center;
     font-size: 18px;
@@ -110,7 +104,6 @@
     margin-top: 30px;
   }
   
-  /* Анімація */
   @keyframes fade-slide {
     from {
       opacity: 0;
