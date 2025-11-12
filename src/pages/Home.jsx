@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { userApi } from '../api/userApi';
+import { productApi } from '../api/productApi';
 import '../styles/Home.css';
 
 const Home = () => {
@@ -15,7 +15,7 @@ const Home = () => {
 
   const fetchUserProducts = useCallback(async () => {
     if (!user) return;
-    const allProducts = await userApi.getProducts();
+    const allProducts = await productApi.getProducts();
     const myProducts = allProducts.filter((p) => p.owner_id === user.id);
     setUserProducts(myProducts);
   }, [user]);

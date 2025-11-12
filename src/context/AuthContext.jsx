@@ -1,8 +1,7 @@
   import React, { createContext, useState, useEffect } from 'react';
-  import { userApi } from '../api/userApi';
-
+  import { authApi } from '../api/authApi';
   export const AuthContext = createContext();
-
+  
   export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -12,16 +11,16 @@
         const token = localStorage.getItem('token');
         if (token) {
           try {
-            // userApi.js вже має axiosClient, який автоматично додає токен у заголовки
+            // authApi.js вже має axiosClient, який автоматично додає токен у заголовки
             // Ми просто перевіряємо, чи токен ще дійсний, отримавши профіль
-            const userProfile = await userApi.getProfile();
+            const userProfile = await authApi.getProfile();
             setUser(userProfile);
             // Оновлюємо localStorage свіжими даними
             localStorage.setItem('user', JSON.stringify(userProfile));
           } catch (error) {
             // Якщо getProfile() повертає 401 або іншу помилку, токен недійсний
             console.error('Auth initialization error:', error);
-            userApi.logout(); // Видаляємо невалідний токен і дані
+            authApi.logout(); // Видаляємо невалідний токен і дані
             setUser(null);
           }
         }
@@ -33,8 +32,8 @@
 
     const register = async (signUpData) => {
       try {
-        // Тепер userApi.register повертає user напряму або кидає помилку
-        const user = await userApi.register(signUpData);
+        // Тепер authApi.register повертає user напряму або кидає помилку
+        const user = await authApi.register(signUpData);
     
         setUser(user);
         localStorage.setItem('user', JSON.stringify(user));
@@ -48,7 +47,7 @@
 
     const login = async (signInData) => {
       try {
-        const user = await userApi.login(signInData); // Тепер отримуємо user напряму
+        const user = await authApi.login(signInData); // Тепер отримуємо user напряму
     
         setUser(user);
         localStorage.setItem('user', JSON.stringify(user));
@@ -60,14 +59,14 @@
     };
 
     const logout = () => {
-      userApi.logout();
+      authApi.logout();
       setUser(null);
       localStorage.removeItem('user');
     };
 
     const updateProfile = async (profileData) => {
       try {
-        const updatedUser = await userApi.updateProfile(profileData);
+        const updatedUser = await authApi.updateProfile(profileData);
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
         return updatedUser;

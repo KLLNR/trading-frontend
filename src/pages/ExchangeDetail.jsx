@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import userApi from '../api/userApi';
+import exchangeApi from '../api/exchangeApi';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ExchangeDetail.css';
 
@@ -17,7 +17,7 @@ const ExchangeDetail = () => {
   const [exchange, setExchange] = useState(null);
 
   useEffect(() => {
-    userApi.getExchangeById(id).then(setExchange);
+    exchangeApi.getExchangeById(id).then(setExchange);
   }, [id]);
 
   if (loading) return <p className="exchange-message">Завантаження...</p>;
@@ -29,8 +29,8 @@ const ExchangeDetail = () => {
   const handleUpdate = async (type) => {
     const updated =
       type === 'accept'
-        ? await userApi.acceptExchange(id)
-        : await userApi.rejectExchange(id);
+        ? await exchangeApi.acceptExchange(id)
+        : await exchangeApi.rejectExchange(id);
     setExchange(updated);
   };
 

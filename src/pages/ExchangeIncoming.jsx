@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import userApi from '../api/userApi';
+import productApi from '../api/productApi';
+import exchangeApi from '../api/exchangeApi';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ExchangeIncoming.css';
@@ -19,8 +20,8 @@ const ExchangeIncoming = () => {
   useEffect(() => {
     if (!user?.id) return;
     const load = async () => {
-      setProducts(await userApi.getProducts());
-      setExchanges(await userApi.getIncomingExchanges());
+      setProducts(await productApi.getProducts());
+      setExchanges(await exchangeApi.getIncomingExchanges());
     };
     load();
   }, [user?.id]);
@@ -52,13 +53,13 @@ const ExchangeIncoming = () => {
               {e.status === 'PENDING' && (
                 <>
                   <button
-                    onClick={() => userApi.acceptExchange(e.id)}
+                    onClick={() => exchangeApi.acceptExchange(e.id)}
                     className="accept"
                   >
                     Прийняти
                   </button>
                   <button
-                    onClick={() => userApi.rejectExchange(e.id)}
+                    onClick={() => exchangeApi.rejectExchange(e.id)}
                     className="reject"
                   >
                     Відхилити

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import userApi from '../api/userApi';
+import productApi from '../api/productApi';
+import exchangeApi from '../api/exchangeApi';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ExchangePropose.css';
 
@@ -19,8 +20,8 @@ const ExchangePropose = () => {
     const load = async () => {
       try {
         const [myProds, targetProd] = await Promise.all([
-          userApi.getMyProducts(),
-          userApi.getProductById(productId),
+          productApi.getMyProducts(),
+          productApi.getProductById(productId),
         ]);
         setMyProducts(myProds);
         setProduct(targetProd);
@@ -39,7 +40,7 @@ const ExchangePropose = () => {
   if (!product) return <p className="exchange-message">Завантаження товару...</p>;
 
   const handleSubmit = async () => {
-    await userApi.createExchange({
+    await exchangeApi.createExchange({
       product_from_id: selectedProduct,
       product_to_id: product.id,
       to_user_id: product.owner_id

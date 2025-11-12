@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { userApi } from '../api/userApi';
+import { productApi } from '../api/productApi';
 import '../styles/ProductDetail.css';
 
 const ProductDetail = () => {
@@ -12,7 +12,7 @@ const ProductDetail = () => {
   const currentUser = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-    userApi.getProducts()
+    productApi.getProducts()
       .then(data => {
         const found = data.find(p => p.id === Number(id));
         setProduct(found);

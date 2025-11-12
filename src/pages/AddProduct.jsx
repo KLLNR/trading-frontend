@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { userApi, CATEGORIES } from '../api/userApi';
+import { CATEGORIES } from '../api/constants.js';
+import { productApi } from '../api/productApi';
 import '../styles/AddProduct.css';
 
 const AddProduct = () => {
@@ -52,7 +53,7 @@ const AddProduct = () => {
     };
 
     try {
-      await userApi.addProduct(productToAdd);
+      await productApi.addProduct(productToAdd);
       alert('Товар додано!');
 
       setNewProduct({

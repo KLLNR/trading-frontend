@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import userApi from '../api/userApi';
+import productApi from '../api/productApi';
+import exchangeApi from '../api/exchangeApi';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ExchangeOutgoing.css';
@@ -21,8 +22,8 @@ const ExchangeOutgoing = () => {
 
     const loadData = async () => {
       try {
-        const prods = await userApi.getProducts();
-        const out = await userApi.getOutgoingExchanges();
+        const prods = await productApi.getProducts();
+        const out = await exchangeApi.getOutgoingExchanges();
         setProducts(prods);
         setExchanges(out);
       } catch (err) {

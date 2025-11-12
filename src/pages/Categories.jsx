@@ -1,10 +1,10 @@
   import React, { useEffect, useState } from 'react';
   import { useParams, useNavigate, Link } from 'react-router-dom';
-  import { userApi } from '../api/userApi';
+  import { productApi } from '../api/productApi';
+  import { CATEGORIES } from '../api/constants';
   import '../styles/Categories.css';
   import { FaLaptop, FaTshirt, FaAppleAlt, FaFootballBall, FaEllipsisH } from 'react-icons/fa';
-
-  const CATEGORIES = ['Електроніка', 'Одяг', 'Їжа', 'Спорт', 'Інше'];
+import authApi from '../api/authApi';
 
   const categoryIcons = {
     'Електроніка': <FaLaptop size={50} />,
@@ -37,7 +37,7 @@
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const allProducts = await userApi.getProducts();
+          const allProducts = await productApi.getProducts();
 
           // Фільтрація по категорії
           let filtered = categoryName
@@ -52,7 +52,7 @@
           const usersTemp = {};
           for (const id of ownerIds) {
             try {
-              const user = await userApi.getUser(id);
+              const user = await authApi.getUser?.(id);
               usersTemp[id] = user;
             } catch (err) {
               console.warn('Не вдалося отримати користувача', id);

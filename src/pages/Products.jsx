@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { userApi, CATEGORIES } from '../api/userApi';
+import { productApi } from '../api/productApi';
+import { CATEGORIES } from '../api/constants';
 import '../styles/Products.css';
 
 const Products = () => {
@@ -29,7 +30,7 @@ const Products = () => {
 
   // === Отримання продуктів ===
   useEffect(() => {
-    userApi.getProducts()
+    productApi.getProducts()
       .then((data) => {
         setProducts(data);
         if (searchQuery) {
@@ -81,7 +82,7 @@ const Products = () => {
       price: newProduct.is_for_sale ? Number(newProduct.price) : 0,
     };
 
-    const result = await userApi.addProduct(productWithUser);
+    const result = await productApi.addProduct(productWithUser);
 
     setProducts([...products, result]);
     setFilteredProducts([...filteredProducts, result]);
