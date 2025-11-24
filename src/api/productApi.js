@@ -32,14 +32,13 @@ export const productApi = {
     }
   },
 
-  getProducts: async () => {
-    if (USE_MOCK) return JSON.parse(localStorage.getItem('products')) || [];
+  getProducts: async (params = {}) => {
     try {
-      const response = await axiosClient.get('/products');
+      const response = await axiosClient.get('/products', { params });
       return response.data;
     } catch (error) {
-      console.error('Get products error:', error.response?.data || error.message);
-      throw error.response?.data?.message || 'Помилка отримання товарів';
+      console.error('Error fetching products:', error);
+      throw error;
     }
   },
 
@@ -51,27 +50,29 @@ export const productApi = {
         id: Math.floor(Math.random() * 100000),
         title: productData.title,
         description: productData.description,
-        image_url: Array.isArray(productData.image_url)
-          ? productData.image_url
-          : [productData.image_url],
-        category: productData.category,
+        imageUrl: productData.imageUrl,
+        categoryId: productData.categoryId,
         contactInfo: productData.contactInfo || storedUser.email,
         owner_id: storedUser.id,
-        is_for_trade: productData.is_for_trade,
-        is_for_sale: productData.is_for_sale,
-        price: productData.is_for_sale ? Number(productData.price) : 0,
-        count: productData.count ?? 1,
+        is_for_trade: productData.isForTrade,
+        is_for_sale: productData.isForSale,
+        price: productData.isForSale ? Number(productData.price) : 0,
       };
-      const updatedProducts = [...storedProducts, newProduct];
-      localStorage.setItem('products', JSON.stringify(updatedProducts));
+      localStorage.setItem('products', JSON.stringify([...storedProducts, newProduct]));
       return newProduct;
     }
+  
     try {
-      const response = await axiosClient.post('/products', productData);
+      // ВАЖЛИВО: просто JSON, без FormData!
+      const response = await axiosClient.post('/products', productData, {
+        headers: {
+          'Content-Type': 'application/json', // Явно вказуємо JSON
+        },
+      });
       return response.data;
     } catch (error) {
       console.error('Add product error:', error.response?.data || error.message);
-      throw error.response?.data?.message || 'Помилка додавання товару';
+      throw new Error(error.response?.data?.message || 'Помилка додавання товару');
     }
   },
 

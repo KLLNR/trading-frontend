@@ -20,10 +20,11 @@ const Login = () => {
 
     try {
       const result = await login({ email, password });
-      if (result.success) {
+      
+      if (result && result.success) {
         navigate('/');
       } else {
-        setError(result.error || 'Помилка логіну');
+        setError(result?.error || 'Помилка логіну');
       }
     } catch (err) {
       console.error('Login error:', err);

@@ -16,7 +16,7 @@ export const authApi = {
       const mockToken = 'mock-token-' + newUser.id;
       localStorage.setItem('token', mockToken);
       localStorage.setItem('user', JSON.stringify(newUser));
-      return newUser;
+      return { token: mockToken, user: newUser };
     }
 
     try {
@@ -48,7 +48,8 @@ export const authApi = {
 
       localStorage.setItem('user', JSON.stringify(user));
 
-      return user;
+      // ВИПРАВЛЕНО: Повертаємо і токен, і юзера
+      return { token, user }; 
     } catch (error) {
       console.error('Register error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.message || 'Помилка реєстрації');
@@ -69,7 +70,7 @@ export const authApi = {
         const mockToken = 'mock-token-123';
         localStorage.setItem('token', mockToken);
         localStorage.setItem('user', JSON.stringify(mockUser));
-        return mockUser;
+        return { token: mockToken, user: mockUser };
       }
       throw new Error('Невірний email або пароль');
     }
@@ -93,7 +94,10 @@ export const authApi = {
 
       localStorage.setItem('user', JSON.stringify(user));
 
-      return user;
+      // ВИПРАВЛЕНО: Повертаємо об'єкт з токеном
+      // AuthContext чекає response.token
+      return { token, user };
+      
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.message || 'Невірний email або пароль');
