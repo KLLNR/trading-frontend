@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import { productApi } from '../api/productApi';
+import { CATEGORIES } from '../api/constants';
 import '../styles/Products.css';
+import '../styles/Categories.css';
+
+const getCategoryName = (categoryId) => {
+  const cat = CATEGORIES.find(c => c.id === Number(categoryId));
+  return cat ? cat.name : 'Інше';
+};
 
 const Products = () => {
   const navigate = useNavigate();
@@ -17,8 +24,16 @@ const Products = () => {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const myId = Number(currentUser?.id);
 
-  // --------- LOAD PRODUCTS ----------
-  const loadProducts = async (pageNumber = 0) => {
+  const getProductImage = (product) => {
+    if (Array.isArray(product.imageUrl)) {
+        return product.imageUrl[0];
+    }
+    return product?.imageUrl || 'https://via.placeholder.com/300';
+  };
+
+  const getProductTitle = (product) => product?.title || 'Без назви';
+
+  const loadProducts = useCallback(async (pageNumber = 0) => {
     try {
       if (pageNumber === 0) setLoading(true);
       else setLoadingMore(true);
@@ -29,7 +44,6 @@ const Products = () => {
         sort: 'id,desc'
       });
 
-      // Фільтруємо лише товари користувача
       const myProducts = content.filter(p => Number(p.ownerId || p.owner_id) === myId);
 
       if (pageNumber === 0) {
@@ -46,7 +60,7 @@ const Products = () => {
       setLoading(false);
       setLoadingMore(false);
     }
-  };
+  }, [myId]); 
 
   useEffect(() => {
     if (!myId) {
@@ -55,7 +69,7 @@ const Products = () => {
       return;
     }
     loadProducts(0);
-  }, [myId]);
+  }, [myId, loadProducts]); 
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
@@ -63,25 +77,24 @@ const Products = () => {
     loadProducts(nextPage);
   };
 
-  // --------- DELETE PRODUCT ----------
-  const handleDelete = async (id) => {
+  const handleDelete = async (e, id) => {
+    e.stopPropagation();
+
     if (!window.confirm('Ви впевнені, що хочете видалити цей товар?')) return;
 
     try {
       await productApi.deleteProduct(id);
-
-      // Видаляємо зі списку
       setProducts(prev => prev.filter(p => p.id !== id));
-
-      // Автодозавантаження, якщо залишилося мало
-      if (products.length < 3 && hasMore) handleLoadMore();
+      
+      if (products.length < 3 && hasMore) {
+        handleLoadMore();
+      }
     } catch (err) {
       console.error(err);
       alert(err.message || 'Не вдалося видалити товар');
     }
   };
 
-  // --------- RENDER ----------
   if (loading) return <div className="loading-text">Завантаження...</div>;
   if (error) return <div className="error-text">{error}</div>;
 
@@ -99,33 +112,38 @@ const Products = () => {
       ) : (
         <ul className="products-list">
           {products.map(product => (
-            <li key={product.id} className="product-card">
+            <li
+              key={product.id}
+              className="product-card"
+              onClick={() => navigate(`/product/${product.id}`)}
+              style={{ cursor: 'pointer', position: 'relative' }}
+            >
+              <img src={getProductImage(product)} alt={getProductTitle(product)} />
 
-              {/* ПЕРЕХІД НА КАРТКУ */}
-              <div onClick={() => navigate(`/product/${product.id}`)} style={{ cursor: "pointer" }}>
-                <img
-                  src={
-                    Array.isArray(product.imageUrl)
-                      ? product.imageUrl[0]
-                      : product.imageUrl || 'https://via.placeholder.com/300?text=Немає+фото'
-                  }
-                  alt={product.title}
-                  onError={e => (e.target.src = 'https://via.placeholder.com/300?text=Немає+фото')}
-                />
+              <h3>{getProductTitle(product)}</h3>
 
-                <h3>{product.title}</h3>
-                <p>{product.isForSale ? `Ціна: ${product.price} грн` : 'На обмін'}</p>
-                <p className="product-date">
-                  Додано: {product.createdAt
-                    ? new Date(product.createdAt).toLocaleDateString('uk-UA')
-                    : 'невідомо'}
-                </p>
+              <div className="product-meta-row">
+                <span className="category-label">
+                  {getCategoryName(product.categoryId || product.category?.id)}
+                </span>
+                
+                <span className="product-date">
+                  {product.createdAt 
+                    ? new Date(product.createdAt).toLocaleDateString('uk-UA') 
+                    : ''}
+                </span>
               </div>
 
-              {/* КНОПКА ВИДАЛИТИ */}
+              {product.isForSale ? (
+                <p className="product-price">{product.price ?? 0} грн</p>
+              ) : product.isForTrade ? (
+                <p className="product-exchange">На обмін</p>
+              ) : null}
+
               <button
                 className="delete-btn"
-                onClick={() => handleDelete(product.id)}
+                onClick={(e) => handleDelete(e, product.id)}
+                style={{ marginTop: '10px', width: '100%', zIndex: 2 }}
               >
                 Видалити
               </button>
@@ -155,4 +173,4 @@ const Products = () => {
   );
 };
 
-export default Products;
+export default Products;  

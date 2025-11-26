@@ -42,6 +42,13 @@ export const productApi = {
     }
   },
 
+  searchProducts: async (keywords, page = 0, size = 12) => {
+    const response = await axiosClient.get('/products/search', {
+      params: { keywords, page, size, sort: 'id,desc' }
+    });
+    return response.data;
+  },
+
   addProduct: async (productData) => {
     if (USE_MOCK) {
       const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
@@ -63,10 +70,9 @@ export const productApi = {
     }
   
     try {
-      // ВАЖЛИВО: просто JSON, без FormData!
       const response = await axiosClient.post('/products', productData, {
         headers: {
-          'Content-Type': 'application/json', // Явно вказуємо JSON
+          'Content-Type': 'application/json', 
         },
       });
       return response.data;

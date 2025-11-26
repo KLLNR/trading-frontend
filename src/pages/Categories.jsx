@@ -4,15 +4,15 @@ import { productApi } from '../api/productApi';
 import { CATEGORIES } from '../api/constants';
 import '../styles/Categories.css';
 import { 
-  FaLaptop, FaTshirt, FaAppleAlt, FaFootballBall, FaEllipsisH,
-  FaChevronLeft, FaChevronRight 
+  FaLaptop, FaTshirt, FaAppleAlt, FaEllipsisH,
+  FaChevronLeft, FaChevronRight, FaBasketballBall 
 } from 'react-icons/fa';
 
 const categoryIcons = {
   'Електроніка': <FaLaptop size={50} />,
   'Одяг': <FaTshirt size={50} />,
   'Їжа': <FaAppleAlt size={50} />,
-  'Спорт': <FaFootballBall size={50} />,
+  'Спорт': <FaBasketballBall size={50} />,
   'Інше': <FaEllipsisH size={50} />,
 };
 
@@ -35,7 +35,13 @@ const Categories = () => {
   
   const pageSize = categoryName ? 8 : 4; 
 
-  const getProductImage = (product) => product?.imageUrl || 'https://via.placeholder.com/300';
+  const getProductImage = (product) => {
+    if (Array.isArray(product.imageUrl)) {
+        return product.imageUrl[0];
+    }
+    return product?.imageUrl || 'https://via.placeholder.com/300';
+  };
+  
   const getProductTitle = (product) => product?.title || 'Без назви';
 
   useEffect(() => {
@@ -48,7 +54,6 @@ const Categories = () => {
       setError('');
 
       try {
-
         const response = await productApi.getProducts({
           sort: 'id,desc',
           size: 1000
@@ -71,11 +76,9 @@ const Categories = () => {
           }
         }
 
-        // Рахуємо скільки всього сторінок вийшло після фільтрації
         const totalPagesCount = Math.ceil(filteredData.length / pageSize);
         setTotalPages(totalPagesCount);
 
-        // Вирізаємо шматок масиву для поточної сторінки
         const startIndex = currentPage * pageSize;
         const endIndex = startIndex + pageSize;
         const productsForCurrentPage = filteredData.slice(startIndex, endIndex);
@@ -92,11 +95,19 @@ const Categories = () => {
     };
 
     fetchData();
-  }, [categoryName, currentPage, pageSize]); // Якщо змінюється сторінка -> перераховуємо slice
+  }, [categoryName, currentPage, pageSize]);
 
   const handleSearch = () => {
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    const query = searchQuery.trim();
+    if (query) {
+      navigate(`/products/search?q=${encodeURIComponent(query)}`);
+    }
+  };
+
+  // --- ДОДАНО ФУНКЦІЮ ДЛЯ ОБРОБКИ ENTER ---
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
     }
   };
 
@@ -116,6 +127,7 @@ const Categories = () => {
           placeholder="Пошук товарів..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={handleKeyDown} /* --- ДОДАНО ОБРОБНИК ПОДІЙ --- */
         />
         <button onClick={handleSearch}>Пошук</button>
       </div>
@@ -152,21 +164,31 @@ const Categories = () => {
                 onClick={() => navigate(`/product/${product.id}`)}
               >
                 <img src={getProductImage(product)} alt={getProductTitle(product)} />
+                
                 <h3>{getProductTitle(product)}</h3>
-                <p className="category-label">
-                   {getCategoryName(product.categoryId || product.category?.id)}
-                </p>
+                
+                <div className="product-meta-row">
+                    <span className="category-label">
+                        {getCategoryName(product.categoryId || product.category?.id)}
+                    </span>
+                    
+                    <span className="product-date">
+                        {product.createdAt 
+                        ? new Date(product.createdAt).toLocaleDateString('uk-UA') 
+                        : ''}
+                    </span>
+                </div>
                 
                 {product.isForSale ? (
                   <p className="product-price">{product.price ?? 0} грн</p>
                 ) : product.isForTrade ? (
                   <p className="product-exchange">На обмін</p>
                 ) : null}
+                
               </li>
             ))}
           </ul>
 
-          {/* Пагінація відображається тільки якщо сторінок більше однієї */}
           {totalPages > 1 && (
             <div className="pagination">
               <button 

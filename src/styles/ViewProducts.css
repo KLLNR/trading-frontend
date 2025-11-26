@@ -1,0 +1,208 @@
+.view-products-container {
+    max-width: 1440px;        
+    margin: 0 auto;
+    padding: 140px 48px 80px;   
+    min-height: 100vh;
+  }
+  
+  .back-btn {
+    background: transparent;
+    border: none;
+    color: #52525b;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .back-btn:hover {
+    color: #0f2e5c;
+  }
+  
+  .view-products-container h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #09090b;
+    margin-bottom: 30px;
+  }
+  
+  .view-products-container h2 strong {
+    color: #0066ff;
+  }
+  
+  .products-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%; 
+  }
+  
+  .view-products-container .product-card {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    
+    width: 100%;
+    height: 140px !important;      
+    min-height: auto !important;    
+    
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    border-radius: 12px;
+    padding: 0 !important;
+    overflow: hidden;
+    box-shadow: none;
+    transition: all 0.2s ease;
+  }
+  
+  .view-products-container .product-card:hover {
+    border-color: #0f2e5c;
+    box-shadow: 0 4px 12px rgba(15, 46, 92, 0.08);
+    transform: translateX(4px);
+  }
+  
+  .view-products-container .product-card img {
+    width: 200px !important;       
+    height: 100% !important;
+    object-fit: cover;
+    border-bottom: none !important;
+    border-right: 1px solid #f4f4f5;
+    margin: 0 !important;
+    background-color: #fafafa;
+  }
+  
+  .view-products-container .card-info {
+    flex: 1;
+    padding: 0 32px;                
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 10px;
+    overflow: hidden;
+  }
+  
+  .view-products-container .card-info h3 {
+    font-size: 20px;             
+    font-weight: 600;
+    color: #09090b;
+    margin: 0;
+    padding: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    text-align: left;
+  }
+  
+  .product-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: #a1a1aa;
+  }
+  
+  .category {
+    background-color: #fafafa;
+    border: 1px solid #e4e4e7;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    color: #52525b;
+  }
+  
+  .view-products-container .card-price-block {
+    padding: 0 40px 0 24px;         
+    text-align: right;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+  }
+  
+  .view-products-container .price {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #09090b !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .view-products-container .exchange {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    color: #318921 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  @media (max-width: 1440px) {
+    .view-products-container {
+      padding: 130px 40px 72px;
+    }
+  }
+  
+  @media (max-width: 1024px) {
+    .view-products-container {
+      padding: 120px 32px 64px;
+    }
+    
+    .view-products-container .product-card img {
+      width: 160px !important;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .view-products-container {
+      padding: 100px 24px 56px;
+    }
+  
+    .view-products-container .product-card {
+      height: auto !important;
+      flex-direction: row !important;
+      align-items: flex-start !important;
+      padding: 12px !important;
+    }
+  
+    .view-products-container .product-card img {
+      width: 100px !important;
+      height: 100px !important;
+      border-radius: 8px;
+      border-right: none;
+    }
+  
+    .view-products-container .card-info {
+      padding: 0 0 0 16px;
+    }
+    
+    .view-products-container .card-info h3 {
+      font-size: 16px;
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+  
+    .view-products-container .card-price-block {
+      min-width: auto;
+      padding: 0 0 0 10px;
+    }
+    
+    .view-products-container .price {
+      font-size: 18px !important;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .view-products-container {
+      padding: 90px 20px 48px;
+    }
+    
+  }
