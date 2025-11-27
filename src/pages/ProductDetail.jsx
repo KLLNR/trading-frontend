@@ -139,7 +139,7 @@ const ProductDetail = () => {
                     {Number(product.price).toLocaleString('uk-UA')} <small>грн</small>
                 </p>
              ) : (
-                <p className="exchange-tag">🔄 Тільки обмін</p>
+                <p className="exchange-tag">Тільки обмін</p>
              )}
           </div>
 

@@ -105,6 +105,29 @@
   line-height: 1;
 }
 
+.app-header .logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3b82f6;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  
+  display: flex;
+  align-items: center;
+  gap: 8px; 
+}
+
+.logo-icon {
+  height: 32px; 
+  width: auto;  
+  display: block;
+}
+
+.app-header .logo:hover {
+  color: #3b82f6;
+}
+
 .btn-outline {
   background-color: transparent;
   color: #ef4444; 

@@ -42,6 +42,15 @@ export const productApi = {
     }
   },
 
+  getUserProducts: async (userId, params = {}) => {
+    try {
+      const response = await axiosClient.get(`/products/users/${userId}`, { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   searchProducts: async (keywords, page = 0, size = 12) => {
     const response = await axiosClient.get('/products/search', {
       params: { keywords, page, size, sort: 'id,desc' }

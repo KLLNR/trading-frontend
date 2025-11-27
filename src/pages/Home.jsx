@@ -1,134 +1,270 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; 
 import { useAuth } from '../context/AuthContext';
 import { productApi } from '../api/productApi';
+import { CATEGORIES } from '../api/constants';
 import '../styles/Home.css';
+import '../styles/Categories.css';
 
 const Home = () => {
-  const { user, updateProfile } = useAuth();
-  const [editFirstName, setEditFirstName] = useState('');
-  const [previewAvatar, setPreviewAvatar] = useState(user?.avatar || '');
-  const [userProducts, setUserProducts] = useState([]);
+  const { user, updateProfile, logout } = useAuth(); 
+  const navigate = useNavigate();
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage] = useState(3); 
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    city: ''
+  });
+
+  const [userProducts, setUserProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
+  const productsPerPage = 4; 
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        phone: user.phone || '',
+        city: user.address?.city || '' 
+      });
+    }
+  }, [user]);
+
+  const getCategoryName = (categoryId) => {
+    const cat = CATEGORIES.find(c => c.id === Number(categoryId));
+    return cat ? cat.name : 'Інше';
+  };
+
+  const getProductImage = (product) => {
+    if (Array.isArray(product.imageUrl) && product.imageUrl.length > 0) {
+      return product.imageUrl[0];
+    }
+    return product?.imageUrl || 'https://via.placeholder.com/300?text=No+Image';
+  };
 
   const fetchUserProducts = useCallback(async () => {
-    if (!user) return;
-    const allProducts = await productApi.getProducts();
-    const myProducts = allProducts.filter((p) => p.owner_id === user.id);
-    setUserProducts(myProducts);
-  }, [user]);
-  
+    if (!user?.id) return;
+
+    setLoadingProducts(true);
+    try {
+      const response = await productApi.getUserProducts(user.id, {
+        page: currentPage,
+        size: productsPerPage,
+        sort: 'id,desc'
+      });
+      setUserProducts(response.content || []);
+      setTotalPages(response.totalPages || 1);
+    } catch (err) {
+      console.error('Не вдалося завантажити товари:', err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }, [user?.id, currentPage]);
 
   useEffect(() => {
     fetchUserProducts();
   }, [fetchUserProducts]);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => setPreviewAvatar(reader.result);
-    reader.readAsDataURL(file);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
-    const updatedData = {
-      firstName: editFirstName || user.firstName,
-      lastName: user.lastName,
-      avatar: previewAvatar || user.avatar,
-    };
+    
+    const dataToSend = new FormData();
+    dataToSend.append('firstName', formData.firstName);
+    dataToSend.append('lastName', formData.lastName);
+    dataToSend.append('phone', formData.phone);
+    dataToSend.append('city', formData.city); 
+
     try {
-      const result = await updateProfile(updatedData);
-      if (result) {
-        alert('Профіль оновлено!');
-        setEditFirstName('');
-      }
+      await updateProfile(dataToSend);
+      setIsEditing(false);
+      alert('Профіль успішно оновлено!');
     } catch (error) {
-      console.error('Помилка оновлення профілю:', error);
-      alert('Помилка оновлення профілю.');
+      alert('Помилка оновлення профілю');
+      console.error(error);
     }
   };
 
-  if (!user) return <p style={{ textAlign: 'center' }}>Будь ласка, увійдіть.</p>;
+  const handleLogout = () => {
+    if (window.confirm('Ви впевнені, що хочете вийти?')) {
+        if (logout) logout();
+        navigate('/login');
+    }
+  };
 
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = userProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-  const totalPages = Math.ceil(userProducts.length / productsPerPage);
+  if (!user) return <div className="loading-text">Будь ласка, увійдіть.</div>;
 
   return (
-    <div className="home-container">
-      <h1>Профіль користувача</h1>
-      <div className="user-info">
-        {user.avatar && <img src={user.avatar} alt="" className="user-avatar" />}
-        <div className="user-details">
-          <p><strong>Ім’я:</strong> {user.firstName} {user.lastName}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Телефон:</strong> {user.phone}</p>
-          <p><strong>Адреса:</strong> {user.address?.street || '-'}, {user.address?.city || '-'}</p>
+    <div className="categories-container" style={{ paddingTop: '100px' }}>
+      
+      <div className="profile-header-section">
+        <div className="profile-card">
+          <div className="profile-title-row">
+             <h2>Мій Профіль</h2>
+             <div className="profile-actions">
+                {!isEditing && (
+                    <button 
+                        className="btn-secondary" 
+                        onClick={() => setIsEditing(true)}
+                    >
+                        Редагувати
+                    </button>
+                )}
+                <button className="btn-danger" onClick={handleLogout}>Вийти</button>
+             </div>
+          </div>
+
+          {!isEditing ? (
+            <div className="profile-details-grid">
+               <div className="detail-item">
+                 <span className="label">Ім'я та Прізвище</span>
+                 <span className="value">{user.firstName} {user.lastName || '—'}</span>
+               </div>
+               <div className="detail-item">
+                 <span className="label">Email</span>
+                 <span className="value">{user.email}</span>
+               </div>
+               <div className="detail-item">
+                 <span className="label">Телефон</span>
+                 <span className="value">{user.phone || 'Не вказано'}</span>
+               </div>
+               <div className="detail-item">
+                 <span className="label">Місто</span>
+                 <span className="value">{user.address?.city || 'Не вказано'}</span>
+               </div>
+               <div className="detail-item full-width">
+                 <span className="label">Статус акаунта</span>
+                 <span className="value badge-success">Активний</span>
+               </div>
+            </div>
+          ) : (
+            <form className="edit-profile-form" onSubmit={handleUpdateProfile}>
+              <div className="form-grid">
+                <div className="form-group">
+                    <label>Ім'я</label>
+                    <input
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Прізвище</label>
+                    <input
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Телефон</label>
+                    <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        placeholder="+380..."
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Місто</label>
+                    <input
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                    />
+                </div>
+              </div>
+              
+              <div className="form-actions">
+                  <button type="button" className="btn-secondary" onClick={() => setIsEditing(false)}>
+                      Скасувати
+                  </button>
+                  <button type="submit" className="pagination-btn active-btn">
+                      Зберегти зміни
+                  </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
 
-      <form className="edit-profile" onSubmit={handleUpdateProfile}>
-  <h3 className="edit-profile-title">Редагування профілю</h3>
+      <hr style={{ margin: '48px 0', borderColor: 'var(--border-light)' }} />
+      <div className="my-products-header">
+         <h2>Мої оголошення</h2>
+      </div>
 
-  <label htmlFor="firstName" className="edit-label">Нове ім’я:</label>
-  <input
-    id="firstName"
-    type="text"
-    placeholder="Введіть нове ім’я"
-    value={editFirstName}
-    onChange={(e) => setEditFirstName(e.target.value)}
-  />
-
-  <label htmlFor="avatarUpload" className="edit-label">Оновити аватар:</label>
-  <input
-    id="avatarUpload"
-    type="file"
-    accept="image/*"
-    onChange={handleFileChange}
-  />
-
-  {previewAvatar && (
-    <img src={previewAvatar} alt="" className="preview-avatar" />
-  )}
-
-  <button type="submit" className="update-btn">Оновити профіль</button>
-</form>
-
-
-      <h2>Мої товари</h2>
-      {userProducts.length === 0 ? (
-        <p>Ви ще не додали жодного товару.</p>
+      {loadingProducts ? (
+        <p className="loading-text">Завантаження товарів...</p>
+      ) : userProducts.length === 0 ? (
+        <div className="no-products">
+           <p>У вас ще немає активних оголошень.</p>
+           <Link to="/add-product" style={{ color: 'var(--primary-color)', fontWeight: 600 }}>Створити перше оголошення</Link>
+        </div>
       ) : (
         <>
-          <div className="user-products">
-  {currentProducts.map((product) => (
-    <Link key={product.id} to={`/product/${product.id}`} className="product-card-link">
-      <div className="product-card">
-        <h3>{product.title}</h3>
-        {product.image_url?.[0] && (
-          <img src={product.image_url[0]} alt={product.title} className="product-image" />
-        )}
-        {product.is_for_sale ? (
-          <p className="price">Ціна: {product.price} грн</p>
-        ) : (
-          <p className="exchange">На обмін</p>
-        )}
-      </div>
-    </Link>
-  ))}
-</div>
+          <div className="products-list"> 
+            {userProducts.map((product) => (
+              <div key={product.id} className="product-card">
+                 <Link to={`/product/${product.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <img 
+                        src={getProductImage(product)} 
+                        alt={product.title} 
+                    />
+                    <h3>{product.title}</h3>
 
+                    <div className="product-meta-row">
+                        <span className="category-label">
+                            {getCategoryName(product.categoryId || product.category?.id)}
+                        </span>
+                        <span className="product-date">
+                            {product.createdAt ? new Date(product.createdAt).toLocaleDateString('uk-UA') : ''}
+                        </span>
+                    </div>
 
-          <div className="pagination">
-            <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>Назад</button>
-            <span>Сторінка {currentPage} з {totalPages}</span>
-            <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>Далі</button>
+                    {product.isForSale ? (
+                        <p className="product-price">{product.price} грн</p>
+                    ) : (
+                        <p className="product-exchange">На обмін</p>
+                    )}
+                 </Link>
+              </div>
+            ))}
           </div>
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button 
+                className="pagination-btn"
+                onClick={() => setCurrentPage(p => Math.max(0, p - 1))} 
+                disabled={currentPage === 0}
+              >
+                Назад
+              </button>
+              <span className="pagination-info">{currentPage + 1} / {totalPages}</span>
+              <button 
+                className="pagination-btn"
+                onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} 
+                disabled={currentPage >= totalPages - 1}
+              >
+                Далі
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>

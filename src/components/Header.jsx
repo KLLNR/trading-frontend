@@ -40,10 +40,14 @@ const Header = () => {
     <header className={`app-header ${hidden ? "hidden" : ""}`}>
       <div className="header-content">
         
-        <Link to="/categories" className="logo" onClick={closeMenu}>
-          Trading-Auction
-        </Link>
-
+      <Link to="/categories" className="logo" onClick={closeMenu}>
+  <img 
+    src="/logosvg.svg" 
+    alt="Logo" 
+    className="logo-icon" 
+  />
+  TradingAuction
+</Link>
         <button 
           className="burger-btn" 
           onClick={() => setIsMenuOpen(!isMenuOpen)}

@@ -55,6 +55,36 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
+  const register = async (formData) => {
+    try {
+      const response = await authApi.register(formData); 
+      
+      const token = response.token || response.data?.token;
+
+      if (token) {
+        localStorage.setItem('token', token);
+        const decoded = parseJwt(token);
+        
+        let userObj = { id: decoded?.id, ...formData }; 
+        setUser(userObj); 
+        
+        try {
+           const profile = await authApi.getProfile();
+           userObj = { ...profile, id: decoded?.id };
+           setUser(userObj);
+           localStorage.setItem('user', JSON.stringify(userObj));
+        } catch (e) {
+           console.warn("Profile fetch skipped after register");
+        }
+      }
+      
+      return response;
+
+    } catch (error) {
+      throw new Error(error.response?.data?.message || error.message || 'Помилка реєстрації');
+    }
+  };
+
   const login = async (signInData) => {
     try {
       const response = await authApi.login(signInData);
@@ -88,15 +118,37 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (formData) => {
+    try {
+      const response = await authApi.updateProfile(formData);
+      const updatedUser = response; 
+
+      const token = localStorage.getItem('token');
+      const syncedUser = syncUserWithToken(updatedUser, token);
+
+      setUser(syncedUser);
+      localStorage.setItem('user', JSON.stringify(syncedUser));
+      return syncedUser;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const logout = () => {
-    authApi.logout();
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      loading, 
+      updateProfile,
+      register 
+    }}>
       {children}
     </AuthContext.Provider>
   );
