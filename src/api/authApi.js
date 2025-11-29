@@ -120,6 +120,15 @@ export const authApi = {
     }
   },
 
+  getUserById: async (userId) => {
+    try {
+      const response = await axiosClient.get(`/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   updateProfile: async (profileData) => {
     if (USE_MOCK) {
       const storedUser = JSON.parse(localStorage.getItem('user'));

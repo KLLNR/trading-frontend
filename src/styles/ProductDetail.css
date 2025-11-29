@@ -230,6 +230,7 @@
   }
   
   .delete-btn:hover {
+    color:#dc2626;
     background-color: #fef2f2;
     border-color: #dc2626;
   }

@@ -22,6 +22,7 @@ import ExchangePropose from './pages/ExchangePropose';
 import ExchangeDetail from './pages/ExchangeDetail';
 import ExchangeIncoming from './pages/ExchangeIncoming';
 import ExchangeOutgoing from './pages/ExchangeOutgoing';
+import CounterProposal from './pages/CounterProposal'; 
 import ViewProducts from './pages/ViewProducts';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -61,8 +62,9 @@ const protectedRoutes = [
   { path: '/exchange/:id', element: <ExchangeDetail /> },
   { path: '/exchange/incoming', element: <ExchangeIncoming /> },
   { path: '/exchange/outgoing', element: <ExchangeOutgoing /> },
+  { path: '/exchange/:id/counter', element: <CounterProposal /> },
+  { path: '/exchange', element: <Navigate to="/exchange/incoming" replace /> },
 ];
-
 
 function App() {
   return (

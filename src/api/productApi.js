@@ -15,6 +15,7 @@ export const productApi = {
     return response.data;
   },
 
+  
   getProductById: async (productId) => {
     if (USE_MOCK) {
       const storedProducts = JSON.parse(localStorage.getItem('products')) || [];

@@ -13,53 +13,70 @@ const ExchangePropose = () => {
   const [myProducts, setMyProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [product, setProduct] = useState(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
-  
+
     const load = async () => {
       try {
-        const [myProds, targetProd] = await Promise.all([
-          productApi.getMyProducts(),
+        const [myProdsResponse, targetProd] = await Promise.all([
+          productApi.getUserProducts(user.id, { page: 0, size: 100 }), // Беремо всі товари
           productApi.getProductById(productId),
         ]);
-        setMyProducts(myProds);
+
+        // Фільтруємо тільки товари на обмін (isForTrade: true, isForSale: false)
+        const filteredMyProducts = (myProdsResponse.content || []).filter(p => 
+          p.isForTrade === true && p.isForSale === false
+        );
+
+        setMyProducts(filteredMyProducts);
         setProduct(targetProd);
       } catch (err) {
-        console.error(err);
+        console.error('Помилка завантаження:', err);
         alert('Помилка при завантаженні даних. Спробуйте пізніше.');
       }
     };
-  
+
     load();
   }, [user?.id, productId]);
-  
+
+  const handleSubmit = async () => {
+    if (!selectedProduct) {
+      alert('Оберіть товар для обміну');
+      return;
+    }
+    setSubmitLoading(true);
+    try {
+      const requestDto = {
+        toUserId: product.ownerId, 
+        productFromId: [Number(selectedProduct)], 
+        productToId: [Number(productId)], 
+      };
+      await exchangeApi.createProposal(requestDto);
+      alert('Пропозиція надіслана!');
+      navigate('/exchange/outgoing');
+    } catch (err) {
+      alert(err.message || 'Помилка надсилання пропозиції');
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
 
   if (loading) return <p className="exchange-message">Завантаження...</p>;
   if (!user) return <p className="exchange-message">Спочатку увійдіть у профіль</p>;
   if (!product) return <p className="exchange-message">Завантаження товару...</p>;
 
-  const handleSubmit = async () => {
-    await exchangeApi.createExchange({
-      product_from_id: selectedProduct,
-      product_to_id: product.id,
-      to_user_id: product.owner_id
-    });
-    navigate('/exchange/outgoing');
-  };
-
   return (
     <div className="exchange-propose-container fade-in">
       <h2>Запропонувати обмін</h2>
-
       <div className="product-card">
         <h3>{product.title}</h3>
-        {product.image && (
-          <img src={product.image} alt={product.title} className="product-image" />
+        {product.imageUrl && (
+          <img src={product.imageUrl} alt={product.title} className="product-image" />
         )}
         <p>{product.description || 'Без опису'}</p>
       </div>
-
       <div className="select-section">
         <label htmlFor="productSelect">Оберіть свій товар для обміну:</label>
         <select
@@ -76,13 +93,12 @@ const ExchangePropose = () => {
           ))}
         </select>
       </div>
-
       <button
         className="submit-button"
-        disabled={!selectedProduct}
+        disabled={!selectedProduct || submitLoading}
         onClick={handleSubmit}
       >
-        Запропонувати обмін
+        {submitLoading ? 'Надсилання...' : 'Запропонувати обмін'}
       </button>
     </div>
   );

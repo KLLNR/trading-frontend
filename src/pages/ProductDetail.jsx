@@ -84,7 +84,6 @@ const ProductDetail = () => {
         &larr; Назад
       </button>
 
-      {/* --- MODAL WINDOW (FULL SCREEN IMAGE) --- */}
       {isModalOpen && selectedImage && (
         <div className="image-modal-overlay" onClick={handleBackdropClick}>
             <div className="image-modal-content">

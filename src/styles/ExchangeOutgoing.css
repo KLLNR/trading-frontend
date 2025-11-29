@@ -1,117 +1,234 @@
 :root {
-    --primary-color: #007bff;
-    --secondary-color: #2c3e50;
-    --text-color: #333;
-    --bg-light: #f8f9fa;
-    --card-bg: #ffffff;
-    --card-shadow: rgba(0, 0, 0, 0.08);
-    --border-radius: 10px;
-    --transition-speed: 0.3s;
+  --status-pending-bg: #fff7ed;
+  --status-pending-text: #c2410c;
+  --status-accepted-bg: #f0fdf4;
+  --status-accepted-text: #15803d;
+  --status-rejected-bg: #fef2f2;
+  --status-rejected-text: #b91c1c;
+  --status-completed-bg: #eff6ff;
+  --status-completed-text: #1d4ed8;
+  --status-canceled-bg: #f4f4f5;
+  --status-canceled-text: #52525b;
+}
+
+.exchange-outgoing-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 120px 24px 80px; 
+  min-height: 60vh;
+}
+
+.exchange-outgoing-container h1 {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 40px;
+  letter-spacing: var(--letter-tight);
+}
+
+.exchange-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.exchange-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-page);
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-subtle);
+  position: relative;
+}
+
+.exchange-item:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-2px);
+}
+
+.exchange-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.exchange-details p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.exchange-details strong {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  width: fit-content;
+  margin-top: 8px;
+}
+
+.status.PENDING {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending-text);
+  border: 1px solid #fed7aa;
+}
+
+.status.ACCEPTED {
+  background-color: var(--status-accepted-bg);
+  color: var(--status-accepted-text);
+  border: 1px solid #bbf7d0;
+}
+
+.status.REJECTED {
+  background-color: var(--status-rejected-bg);
+  color: var(--status-rejected-text);
+  border: 1px solid #fecaca;
+}
+
+.status.COMPLETED {
+  background-color: var(--status-completed-bg);
+  color: var(--status-completed-text);
+  border: 1px solid #bfdbfe;
+}
+
+.status.CANCELED {
+  background-color: var(--status-canceled-bg);
+  color: var(--status-canceled-text);
+  border: 1px solid #e4e4e7;
+}
+
+.exchange-actions {
+  padding-left: 24px;
+}
+
+.view-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.view-link:hover {
+  background-color: var(--bg-page);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  box-shadow: var(--shadow-subtle);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.pagination span {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.pagination button {
+  padding: 10px 24px;
+  background-color: var(--bg-page);
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pagination button:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--bg-elevated);
+}
+
+.exchange-message {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 16px;
+  padding: 80px 0;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-strong);
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-  
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
   .exchange-outgoing-container {
-    max-width: 1000px;
-    margin: 60px auto;
-    padding: 40px 20px;
-    background-color: var(--bg-light);
-    border-radius: var(--border-radius);
-    animation: fade-slide 0.6s ease;
+    padding: 100px 20px 60px;
   }
-  
-  .exchange-outgoing-container h1 {
-    text-align: center;
-    color: var(--secondary-color);
-    margin-bottom: 40px;
-    font-size: 30px;
-    border-bottom: 2px solid #dee2e6;
-    padding-bottom: 10px;
-  }
-  
-  .exchange-list {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    gap: 25px;
-  }
-  
+
   .exchange-item {
-    background-color: var(--card-bg);
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 12px var(--card-shadow);
-    padding: 25px;
-    display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: flex-start;
-    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-    animation: fade-slide 0.5s ease forwards;
+    gap: 20px;
+    padding: 20px;
   }
-  
-  .exchange-item:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 8px 18px var(--card-shadow);
+
+  .exchange-details {
+    width: 100%;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
   }
-  
-  .exchange-details p {
-    margin: 6px 0;
-    color: var(--text-color);
-    font-size: 15px;
+
+  .exchange-actions {
+    padding-left: 0;
+    width: 100%;
   }
-  
-  .exchange-details .status {
-    font-weight: 600;
-    margin-top: 10px;
-  }
-  
-  .status.PENDING {
-    color: orange;
-  }
-  
-  .status.ACCEPTED {
-    color: green;
-  }
-  
-  .status.REJECTED {
-    color: red;
-  }
-  
-  .status.COMPLETED {
-    color: var(--primary-color);
-  }
-  
+
   .view-link {
-    text-decoration: none;
-    background-color: var(--secondary-color);
-    color: #fff;
-    padding: 10px 18px;
-    border-radius: var(--border-radius);
-    transition: all var(--transition-speed);
-    font-weight: 600;
-    text-align: center;
-    display: inline-block;
-    box-shadow: 0 4px 10px var(--card-shadow);
+    width: 100%; 
   }
-  
-  .view-link:hover {
-    background-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px var(--card-shadow);
-  }
-  
-  .exchange-message {
-    text-align: center;
-    font-size: 18px;
-    color: #6c757d;
-    margin-top: 30px;
-  }
-  
-  @keyframes fade-slide {
-    from {
-      opacity: 0;
-      transform: translateY(15px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
+}

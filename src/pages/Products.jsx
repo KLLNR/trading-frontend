@@ -100,7 +100,7 @@ const Products = () => {
 
   return (
     <div className="products-container">
-      <h2>Мої товари ({products.length})</h2>
+      <h2>Мої оголошення ({products.length})</h2>
 
       {products.length === 0 ? (
         <div className="no-products">
@@ -163,12 +163,6 @@ const Products = () => {
           </button>
         </div>
       )}
-
-      <div style={{ textAlign: 'center', marginTop: '30px' }}>
-        <button onClick={() => navigate('/add-product')} className="exchange-btn">
-          Додати новий товар
-        </button>
-      </div>
     </div>
   );
 };

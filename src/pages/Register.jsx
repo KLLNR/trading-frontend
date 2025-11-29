@@ -21,13 +21,14 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false); // 1. Стан завантаження
+  const [isLoading, setIsLoading] = useState(false);
   const [showCountryOptions, setShowCountryOptions] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
   
   const { register, user } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  const countryInputRef = useRef(null);
 
   const filteredCountries = useMemo(() => {
     return COUNTRIES_LIST.filter(c => 
@@ -55,7 +56,7 @@ const Register = () => {
     let newErrors = {};
     let isValid = true;
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!formData.email || !emailRegex.test(formData.email)) {
       newErrors.email = 'Введіть коректний email';
       isValid = false;
@@ -112,11 +113,18 @@ const Register = () => {
   };
 
   const handleCountrySelect = (country) => {
-    setFormData((prev) => ({
-      ...prev,
-      phone: (prev.phone.length < 2) ? country.dialCode : prev.phone,
-      address: { ...prev.address, country: country.name }
-    }));
+    setFormData((prev) => {
+
+      const currentPhone = prev.phone;
+      const newPhone = currentPhone.length < 4 ? country.dialCode : currentPhone;
+      
+      return {
+        ...prev,
+        phone: newPhone,
+        address: { ...prev.address, country: country.name }
+      };
+    });
+
     setCountrySearch(country.name);
     setShowCountryOptions(false);
     
@@ -126,14 +134,33 @@ const Register = () => {
   const handleCountrySearchChange = (e) => {
     const value = e.target.value;
     setCountrySearch(value);
-
+    
     const exactMatch = COUNTRIES_LIST.find(c => c.name.toLowerCase() === value.toLowerCase());
     
     setFormData(prev => ({
        ...prev, 
-       address: { ...prev.address, country: exactMatch ? exactMatch.name : value } 
+       address: { ...prev.address, country: exactMatch ? exactMatch.name : '' } 
     }));
     setShowCountryOptions(true);
+  };
+
+  const handleCountryBlur = () => {
+    setTimeout(() => {
+        const exactMatch = COUNTRIES_LIST.find(c => c.name.toLowerCase() === countrySearch.toLowerCase());
+        if (!exactMatch && countrySearch !== '') {
+        } else if (exactMatch) {
+             setCountrySearch(exactMatch.name); 
+        }
+    }, 200);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && showCountryOptions && filteredCountries.length > 0) {
+        e.preventDefault();
+        handleCountrySelect(filteredCountries[0]); 
+    } else if (e.key === 'Escape') {
+        setShowCountryOptions(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -146,7 +173,8 @@ const Register = () => {
     } catch (err) {
       console.error('Registration failed:', err);
       setErrors(prev => ({ ...prev, global: err.message || 'Помилка реєстрації' }));
-      setIsLoading(false);
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -190,22 +218,29 @@ const Register = () => {
             <div className="custom-select" ref={dropdownRef}>
               <input 
                 id="country"
+                ref={countryInputRef}
                 type="text" 
                 name="country"
                 value={countrySearch} 
                 onChange={handleCountrySearchChange}
                 onFocus={() => setShowCountryOptions(true)}
+                onBlur={handleCountryBlur} 
+                onKeyDown={handleKeyDown} 
                 placeholder="Пошук країни..."
                 className={errors.country ? 'input-error' : ''}
                 autoComplete="off"
                 disabled={isLoading}
               />
               {showCountryOptions && (
-                <ul className="options-list">
+                <ul className="options-list" role="listbox">
                   {filteredCountries.length > 0 ? (
                     filteredCountries.map((c) => (
-                      <li key={c.code} onClick={() => handleCountrySelect(c)}>
-                        {/* Припускаємо, що flag - це emoji або компонент */}
+                      <li 
+                        key={c.code} 
+                        onClick={() => handleCountrySelect(c)}
+                        role="option" 
+                        aria-selected={formData.address.country === c.name}
+                      >
                         <span className="flag">{c.flag}</span> {c.name}
                       </li>
                     ))
@@ -247,7 +282,7 @@ const Register = () => {
                 {errors.phone && <span className="error-text">{errors.phone}</span>}
              </div>
           </div>
-
+          
           <div className="form-group-row">
             <div className="input-wrapper" style={{flex: 2}}>
                 <label htmlFor="street">Вулиця</label>

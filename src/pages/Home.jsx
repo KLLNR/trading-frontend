@@ -11,11 +11,15 @@ const Home = () => {
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Стан форми для редагування (плоска структура для зручності input-ів)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     phone: '',
-    city: ''
+    city: '',
+    street: '',
+    postalCode: ''
   });
 
   const [userProducts, setUserProducts] = useState([]);
@@ -25,13 +29,17 @@ const Home = () => {
 
   const productsPerPage = 4; 
 
+  // Заповнюємо форму даними користувача при завантаженні
   useEffect(() => {
     if (user) {
       setFormData({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         phone: user.phone || '',
-        city: user.address?.city || '' 
+        // Безпечний доступ до вкладених полів адреси
+        city: user.address?.city || '',
+        street: user.address?.street || '',
+        postalCode: user.address?.postalCode || ''
       });
     }
   }, [user]);
@@ -76,17 +84,28 @@ const Home = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // --- ОСНОВНЕ ВИПРАВЛЕННЯ ТУТ ---
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     
-    const dataToSend = new FormData();
-    dataToSend.append('firstName', formData.firstName);
-    dataToSend.append('lastName', formData.lastName);
-    dataToSend.append('phone', formData.phone);
-    dataToSend.append('city', formData.city); 
+    // Формуємо об'єкт так, як цього очікує сервер (структура як при реєстрації)
+    const payload = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
+      address: {
+        // Зберігаємо країну, яка була раніше, бо ми її не редагуємо тут, 
+        // але вона має залишитись в об'єкті адреси
+        country: user.address?.country || '', 
+        city: formData.city,
+        street: formData.street,
+        postalCode: formData.postalCode
+      }
+    };
 
     try {
-      await updateProfile(dataToSend);
+      // Відправляємо чистий JSON об'єкт замість FormData
+      await updateProfile(payload);
       setIsEditing(false);
       alert('Профіль успішно оновлено!');
     } catch (error) {
@@ -125,6 +144,7 @@ const Home = () => {
           </div>
 
           {!isEditing ? (
+            /* РЕЖИМ ПЕРЕГЛЯДУ */
             <div className="profile-details-grid">
                <div className="detail-item">
                  <span className="label">Ім'я та Прізвище</span>
@@ -138,16 +158,31 @@ const Home = () => {
                  <span className="label">Телефон</span>
                  <span className="value">{user.phone || 'Не вказано'}</span>
                </div>
+               
+               <div className="detail-item">
+                 <span className="label">Країна</span>
+                 <span className="value">{user.address?.country || 'Не вказано'}</span>
+               </div>
                <div className="detail-item">
                  <span className="label">Місто</span>
                  <span className="value">{user.address?.city || 'Не вказано'}</span>
                </div>
+               <div className="detail-item">
+                 <span className="label">Вулиця</span>
+                 <span className="value">{user.address?.street || 'Не вказано'}</span>
+               </div>
+               <div className="detail-item">
+                 <span className="label">Індекс</span>
+                 <span className="value">{user.address?.postalCode || 'Не вказано'}</span>
+               </div>
+
                <div className="detail-item full-width">
                  <span className="label">Статус акаунта</span>
                  <span className="value badge-success">Активний</span>
                </div>
             </div>
           ) : (
+            /* РЕЖИМ РЕДАГУВАННЯ */
             <form className="edit-profile-form" onSubmit={handleUpdateProfile}>
               <div className="form-grid">
                 <div className="form-group">
@@ -179,15 +214,6 @@ const Home = () => {
                         placeholder="+380..."
                     />
                 </div>
-                <div className="form-group">
-                    <label>Місто</label>
-                    <input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                    />
-                </div>
               </div>
               
               <div className="form-actions">
@@ -205,7 +231,7 @@ const Home = () => {
 
       <hr style={{ margin: '48px 0', borderColor: 'var(--border-light)' }} />
       <div className="my-products-header">
-         <h2>Мої оголошення</h2>
+          <h2>Мої оголошення</h2>
       </div>
 
       {loadingProducts ? (

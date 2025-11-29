@@ -22,7 +22,7 @@ const ViewProducts = () => {
     const fetchSearchResults = async () => {
       setLoading(true);
       try {
-        const response = await productApi.searchProducts(query, { page: currentPage, size: 12 });
+        const response = await productApi.searchProducts(query, { page: currentPage, size: 10 });
         setProducts(response.content || []);
         setTotalPages(response.totalPages || 1);
       } catch (err) {
@@ -39,43 +39,42 @@ const ViewProducts = () => {
   if (!query) return null;
 
   return (
-    <div className="view-products-container">
-      <button onClick={() => navigate(-1)} className="back-btn">
+    <div className="vp-wrapper">
+      <button onClick={() => navigate(-1)} className="vp-back-btn">
         ← Назад
       </button>
 
-      <h2>Результати пошуку за запитом: <strong>"{query}"</strong></h2>
+      <h2 className="vp-title">Результати пошуку: <strong>"{query}"</strong></h2>
       
       {loading ? (
-        <p className="loading">Пошук товарів...</p>
+        <p className="vp-loading">Завантаження...</p>
       ) : products.length === 0 ? (
-        <div className="no-results">
-          <p>За запитом "<strong>{query}</strong>" нічого не знайдено</p>
-          <p>Спробуйте інший запит</p>
+        <div className="vp-empty">
+          <p>Нічого не знайдено за запитом "<strong>{query}</strong>"</p>
         </div>
       ) : (
         <>
-          <div className="products-grid">
+          <div className="vp-list-container">
             {products.map(product => (
               <div
                 key={product.id}
-                className="product-card"
+                className="vp-card"
                 onClick={() => navigate(`/product/${product.id}`)}
               >
                 <img 
                   src={Array.isArray(product.imageUrl) ? product.imageUrl[0] : product.imageUrl || '/placeholder.jpg'} 
                   alt={product.title}
+                  className="vp-card-img"
                 />
                 
-                <div className="card-info">
-                  <h3>{product.title}</h3>
+                <div className="vp-card-content">
+                  <h3 className="vp-card-title">{product.title}</h3>
                   
-                  <div className="product-meta">
-                    <span className="category">
+                  <div className="vp-meta-row">
+                    <span className="vp-tag">
                       {product.category?.name || 'Інше'}
                     </span>
-                    <span className="separator">•</span>
-                    <span className="date">
+                    <span className="vp-date">
                       {product.createdAt 
                         ? new Date(product.createdAt).toLocaleDateString('uk-UA') 
                         : ''}
@@ -83,12 +82,11 @@ const ViewProducts = () => {
                   </div>
                 </div>
 
-                {/* 3. ЦІНА (Права частина) */}
-                <div className="card-price-block">
+                <div className="vp-price-area">
                   {product.isForSale ? (
-                    <p className="price">{product.price} грн</p>
+                    <p className="vp-price-main">{product.price} грн</p>
                   ) : (
-                    <p className="exchange">На обмін</p>
+                    <p className="vp-price-exchange">Обмін</p>
                   )}
                 </div>
               </div>
@@ -96,19 +94,23 @@ const ViewProducts = () => {
           </div>
 
           {totalPages > 1 && (
-            <div className="pagination">
+            <div className="vp-pagination">
               <button 
+                className="vp-pag-btn"
                 onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
                 disabled={currentPage === 0}
               >
-                ← Назад
+                ←
               </button>
-              <span>{currentPage + 1} з {totalPages}</span>
+              <span style={{ display: 'flex', alignItems: 'center', fontWeight: 500 }}>
+                {currentPage + 1} / {totalPages}
+              </span>
               <button 
+                className="vp-pag-btn"
                 onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
                 disabled={currentPage >= totalPages - 1}
               >
-                Далі →
+                →
               </button>
             </div>
           )}
