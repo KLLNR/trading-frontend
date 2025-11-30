@@ -10,7 +10,7 @@ const statusLabels = {
   ACCEPTED: 'Прийнято',
   REJECTED: 'Відхилено',
   COMPLETED: 'Завершено',
-  CANCELED: 'Скасовано' // Додаємо, бо в бекенді є CANCELED
+  CANCELED: 'Скасовано' 
 };
 
 const ExchangeOutgoing = () => {
@@ -26,17 +26,15 @@ const ExchangeOutgoing = () => {
 
     const load = async () => {
       try {
-        // Отримуємо вихідні пропозиції з пагінацією
         const outgoingResponse = await exchangeApi.getOutgoingProposals({
           page: currentPage,
-          size: 10, // Регульована кількість на сторінці
+          size: 10, 
           sort: 'createdAt,desc'
         });
 
         setExchanges(outgoingResponse.content || []);
         setTotalPages(outgoingResponse.totalPages || 1);
 
-        // Отримуємо всі продукти для імен (кешуємо)
         const allProducts = await productApi.getProducts({ size: 1000 });
         const productsMap = {};
         (allProducts.content || allProducts).forEach(p => {

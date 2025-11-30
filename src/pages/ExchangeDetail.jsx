@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom'; 
 import exchangeApi from '../api/exchangeApi';
 import productApi from '../api/productApi';
+import userApi from '../api/userApi';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ExchangeDetail.css';
 
@@ -23,10 +24,14 @@ const ExchangeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  
   const [proposal, setProposal] = useState(null);
   const [products, setProducts] = useState({});
   const [shippingAddress, setShippingAddress] = useState(null);
   const [error, setError] = useState('');
+
+  const [fromUserName, setFromUserName] = useState('');
+  const [toUserName, setToUserName] = useState('');
 
   useEffect(() => {
     const loadProposal = async () => {
@@ -65,13 +70,27 @@ const ExchangeDetail = () => {
           }
         }
       } catch (err) {
-        console.error('Помилка завантаження:', err);
+        console.error(err);
         setError(err.message || 'Не вдалося завантажити дані пропозиції');
       }
     };
 
     loadProposal();
   }, [id, user?.id]);
+
+  useEffect(() => {
+    if (proposal) {
+        const formatName = (u) => `${u.firstName} ${u.lastName ? u.lastName.charAt(0) + '.' : ''}`;
+
+        userApi.getUserById(proposal.fromUserId)
+            .then(data => setFromUserName(formatName(data)))
+            .catch(() => setFromUserName(`Користувач #${proposal.fromUserId}`));
+
+        userApi.getUserById(proposal.toUserId)
+            .then(data => setToUserName(formatName(data)))
+            .catch(() => setToUserName(`Користувач #${proposal.toUserId}`));
+    }
+  }, [proposal]);
 
   const getProductNames = (productIds) => {
     if (!productIds || !Array.isArray(productIds)) return 'Товари відсутні';
@@ -132,6 +151,13 @@ const ExchangeDetail = () => {
     navigate(`/exchange/${id}/counter`);
   };
 
+  const linkStyle = {
+    color: 'var(--primary-color, #007bff)', 
+    textDecoration: 'none',
+    fontWeight: 'bold',
+    marginLeft: '6px'
+  };
+
   if (loading) return <p className="exchange-message">Завантаження даних...</p>;
   if (!user) return <p className="exchange-message">Будь ласка, авторизуйтесь для перегляду</p>;
   if (error) return <p className="exchange-message">{error}</p>;
@@ -143,9 +169,29 @@ const ExchangeDetail = () => {
 
       <h2>Деталі пропозиції обміну</h2>
       <div className="exchange-info">
+        
         <div className="users-info">
-          <p><strong>Відправник пропозиції:</strong> Користувач #{proposal.fromUserId}</p>
-          <p><strong>Отримувач пропозиції:</strong> {isToUser ? 'Ви' : `Користувач #${proposal.toUserId}`}</p>
+          <p>
+            <strong>Відправник пропозиції:</strong> 
+            {user.id === proposal.fromUserId ? (
+               <span style={{ marginLeft: '6px' }}>Ви</span>
+            ) : (
+               <Link to={`/user/${proposal.fromUserId}`} style={linkStyle}>
+                 {fromUserName || 'Завантаження...'}
+               </Link>
+            )}
+          </p>
+
+          <p>
+            <strong>Отримувач пропозиції:</strong> 
+            {isToUser ? (
+               <span style={{ marginLeft: '6px' }}>Ви</span>
+            ) : (
+               <Link to={`/user/${proposal.toUserId}`} style={linkStyle}>
+                 {toUserName || 'Завантаження...'}
+               </Link>
+            )}
+          </p>
         </div>
 
         <div className="products-info">
@@ -179,21 +225,20 @@ const ExchangeDetail = () => {
       </div>
 
       {proposal.status === 'ACCEPTED' && isToUser && shippingAddress && (
-  <div className="shipping-info">
-    <h3>Куди відправляти ваш товар:</h3>
-    <div className="address-details">
-      <p><strong>Країна:</strong> {shippingAddress.country}</p>
-      <p><strong>Поштовий індекс:</strong> {shippingAddress.postalCode}</p>
-      
-      <p><strong>Місто:</strong> {shippingAddress.city}</p>
-      <p><strong>Вулиця/Відділення:</strong> {shippingAddress.street}</p>
-    </div>
-    <p className="shipping-note">
-      Ви прийняли пропозицію — надішліть свій товар на цю адресу першому. 
-      Після отримання ініціатор надішле свій.
-    </p>
-  </div>
-)}
+        <div className="shipping-info">
+          <h3>Куди відправляти ваш товар:</h3>
+          <div className="address-details">
+            <p><strong>Країна:</strong> {shippingAddress.country}</p>
+            <p><strong>Поштовий індекс:</strong> {shippingAddress.postalCode}</p>
+            <p><strong>Місто:</strong> {shippingAddress.city}</p>
+            <p><strong>Вулиця/Відділення:</strong> {shippingAddress.street}</p>
+          </div>
+          <p className="shipping-note">
+            Ви прийняли пропозицію — надішліть свій товар на цю адресу першому. 
+            Після отримання ініціатор надішле свій.
+          </p>
+        </div>
+      )}
 
       {proposal.status === 'ACCEPTED' && isToUser && !shippingAddress && (
         <div className="address-action">

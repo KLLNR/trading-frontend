@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { productApi } from '../api/productApi';
+import paymentApi from '../api/paymentApi';
+import userApi from '../api/userApi';
 import '../styles/ProductDetail.css';
 
 const ProductDetail = () => {
@@ -11,6 +13,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
+  const [ownerName, setOwnerName] = useState('');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -44,6 +47,19 @@ const ProductDetail = () => {
   }, [id]);
 
   useEffect(() => {
+    if (product && product.ownerId) {
+        userApi.getUserById(product.ownerId)
+            .then(data => {
+                const nameDisplay = data.lastName 
+                    ? `${data.firstName} ${data.lastName.charAt(0)}.` 
+                    : data.firstName;
+                setOwnerName(nameDisplay);
+            })
+            .catch(err => console.error(err));
+    }
+  }, [product]);
+
+  useEffect(() => {
     const handleEsc = (e) => {
         if (e.key === 'Escape') setIsModalOpen(false);
     };
@@ -68,6 +84,28 @@ const ProductDetail = () => {
         navigate('/categories');
       } catch (err) {
         alert(err.message || 'Не вдалося видалити товар');
+      }
+    }
+  };
+
+  const handleBuy = async (productId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Токен відсутній. Увійдіть заново');
+        navigate('/login');
+        return;
+      }
+  
+      const payment = await paymentApi.createPayment(productId);
+      window.location.href = payment.sessionUrl; 
+    } catch (err) {
+      console.error(err);
+      if (err.response?.status === 401) {
+        alert('Токен недійсний. Увійдіть заново');
+        navigate('/login');
+      } else {
+        alert(err.message || 'Помилка платежу');
       }
     }
   };
@@ -99,8 +137,8 @@ const ProductDetail = () => {
             <img 
                 src={selectedImage} 
                 alt={product.title} 
-                className="main-image clickable-image" // Додано клас
-                onClick={() => setIsModalOpen(true)}   // Додано подію
+                className="main-image clickable-image"
+                onClick={() => setIsModalOpen(true)}
                 onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=No+Image'; }}
             />
           ) : (
@@ -123,6 +161,16 @@ const ProductDetail = () => {
         </div>
 
         <div className="product-info">
+          
+          {product.ownerId && !isOwner && (
+            <div className="owner-section-top" style={{ marginBottom: '10px', fontSize: '0.9rem', color: '#555' }}>
+              <span>Власник: </span>
+              <Link to={`/user/${product.ownerId}`} style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 'bold' }}>
+                {ownerName || 'Завантаження...'}
+              </Link>
+            </div>
+          )}
+
           <div className="product-header">
             <h2>{product.title}</h2>
             <span className="product-date">
@@ -149,12 +197,21 @@ const ProductDetail = () => {
 
           <div className="action-buttons">
             {!isOwner ? (
-              <button
-                className="exchange-btn"
-                onClick={() => navigate(`/exchange/propose/${id}`)}
-              >
-                Запропонувати обмін
-              </button>
+              <div className="buyer-actions" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {product.isForSale && (
+                   <button className="buy-btn" onClick={() => handleBuy(product.id)}>
+                     Купити
+                   </button>
+                )}
+                {product.isForTrade && (
+                  <button
+                    className="exchange-btn"
+                    onClick={() => navigate(`/exchange/propose/${id}`)}
+                  >
+                    Запропонувати обмін
+                  </button>
+                )}
+              </div>
             ) : (
               <div className="owner-actions">
                 <button className="delete-btn" onClick={handleDelete}>

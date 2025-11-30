@@ -6,10 +6,9 @@
   margin: 0 auto;
   padding: 120px 48px 80px;
   min-height: 100vh;
-  box-sizing: border-box; /* Локальний reset */
+  box-sizing: border-box; 
 }
 
-/* Локальний reset box-sizing тільки для елементів цього блоку */
 .vp-wrapper *, 
 .vp-wrapper *::before, 
 .vp-wrapper *::after {
@@ -18,7 +17,6 @@
   padding: 0;
 }
 
-/* --- Кнопка "Назад" --- */
 .vp-back-btn {
   display: inline-flex;
   align-items: center;
@@ -42,7 +40,6 @@
   box-shadow: var(--shadow-soft);
 }
 
-/* --- Заголовок --- */
 .vp-title {
   font-size: 32px;
   font-weight: 600;
@@ -51,7 +48,6 @@
   letter-spacing: -0.025em;
 }
 
-/* --- Контейнер списку --- */
 .vp-list-container {
   display: flex;
   flex-direction: column;
@@ -59,7 +55,6 @@
   margin-bottom: 72px;
 }
 
-/* --- Картка товару (Ізольована) --- */
 .vp-card {
   display: flex;
   flex-direction: row;
@@ -80,17 +75,15 @@
   transform: translateY(-2px);
 }
 
-/* --- Зображення --- */
 .vp-card-img {
   width: 240px;
   height: 100%;
   object-fit: cover;
   border-right: 1px solid var(--border-light);
   background-color: var(--bg-elevated);
-  display: block; /* Fix для відступів картинок */
+  display: block; 
 }
 
-/* Анімація тільки якщо пристрій підтримує hover */
 @media (hover: hover) {
   .vp-card-img {
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -100,7 +93,6 @@
   }
 }
 
-/* --- Контент --- */
 .vp-card-content {
   flex: 1;
   padding: 24px 32px;
@@ -155,7 +147,6 @@
   white-space: nowrap;
 }
 
-/* --- Ціна --- */
 .vp-price-area {
   width: 220px;
   display: flex;
@@ -180,7 +171,6 @@
   letter-spacing: -0.025em;
 }
 
-/* --- Пагінація --- */
 .vp-pagination {
   display: flex;
   justify-content: center;
@@ -215,8 +205,6 @@
   opacity: 0.3;
   cursor: not-allowed;
 }
-
-/* --- Адаптивність (тільки для цього модуля) --- */
 
 @media (max-width: 1024px) {
   .vp-wrapper { padding: 100px 32px 64px; }

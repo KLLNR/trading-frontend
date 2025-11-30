@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CATEGORIES } from '../api/constants.js';
 import { productApi } from '../api/productApi';
-import '../styles/AddProduct.css'; // Або створи окремий CSS для Edit
+import '../styles/AddProduct.css'; 
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -62,7 +62,6 @@ const EditProduct = () => {
       return;
     }
 
-    // Валідація
     if (!product.title.trim() || !product.description.trim() || !product.categoryId || !product.imageUrl.trim()) {
       setError('Заповніть усі обов’язкові поля');
       setLoading(false);

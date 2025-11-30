@@ -301,6 +301,35 @@
   }
 }
 
+.show-phone-btn {
+  background: none;
+  border: none;
+  color: #007bff; 
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;     
+  margin: 0;      
+  font-size: 16px; 
+  text-align: left;
+}
+
+.show-phone-btn:hover {
+  text-decoration: none;
+  color: #0056b3;
+}
+
+.show-phone-btn:active {
+  background-color: #dae0e5;
+  transform: translateY(1px); 
+}
+
+.phone-revealed {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
 @keyframes fadeIn {
   from { 
     opacity: 0; 

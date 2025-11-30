@@ -12,7 +12,6 @@ const Home = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   
-  // Стан форми для редагування (плоска структура для зручності input-ів)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -29,14 +28,12 @@ const Home = () => {
 
   const productsPerPage = 4; 
 
-  // Заповнюємо форму даними користувача при завантаженні
   useEffect(() => {
     if (user) {
       setFormData({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         phone: user.phone || '',
-        // Безпечний доступ до вкладених полів адреси
         city: user.address?.city || '',
         street: user.address?.street || '',
         postalCode: user.address?.postalCode || ''
@@ -84,18 +81,14 @@ const Home = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // --- ОСНОВНЕ ВИПРАВЛЕННЯ ТУТ ---
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     
-    // Формуємо об'єкт так, як цього очікує сервер (структура як при реєстрації)
     const payload = {
       firstName: formData.firstName,
       lastName: formData.lastName,
       phone: formData.phone,
       address: {
-        // Зберігаємо країну, яка була раніше, бо ми її не редагуємо тут, 
-        // але вона має залишитись в об'єкті адреси
         country: user.address?.country || '', 
         city: formData.city,
         street: formData.street,
@@ -104,7 +97,6 @@ const Home = () => {
     };
 
     try {
-      // Відправляємо чистий JSON об'єкт замість FormData
       await updateProfile(payload);
       setIsEditing(false);
       alert('Профіль успішно оновлено!');
@@ -182,7 +174,6 @@ const Home = () => {
                </div>
             </div>
           ) : (
-            /* РЕЖИМ РЕДАГУВАННЯ */
             <form className="edit-profile-form" onSubmit={handleUpdateProfile}>
               <div className="form-grid">
                 <div className="form-group">

@@ -1,6 +1,6 @@
 import axiosClient from './axiosInstance';
 
-const USE_MOCK = false; // true — mock, false — реальний бекенд
+const USE_MOCK = false; 
 
 export const authApi = {
   register: async (signUpData) => {
@@ -48,7 +48,6 @@ export const authApi = {
 
       localStorage.setItem('user', JSON.stringify(user));
 
-      // ВИПРАВЛЕНО: Повертаємо і токен, і юзера
       return { token, user }; 
     } catch (error) {
       console.error('Register error:', error.response?.data || error.message);
@@ -94,8 +93,6 @@ export const authApi = {
 
       localStorage.setItem('user', JSON.stringify(user));
 
-      // ВИПРАВЛЕНО: Повертаємо об'єкт з токеном
-      // AuthContext чекає response.token
       return { token, user };
       
     } catch (error) {

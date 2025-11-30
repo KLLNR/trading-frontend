@@ -104,7 +104,6 @@ const Categories = () => {
     }
   };
 
-  // --- ДОДАНО ФУНКЦІЮ ДЛЯ ОБРОБКИ ENTER ---
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleSearch();
@@ -127,7 +126,7 @@ const Categories = () => {
           placeholder="Пошук товарів..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={handleKeyDown} /* --- ДОДАНО ОБРОБНИК ПОДІЙ --- */
+          onKeyDown={handleKeyDown} 
         />
         <button onClick={handleSearch}>Пошук</button>
       </div>

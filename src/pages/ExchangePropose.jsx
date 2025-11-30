@@ -21,11 +21,10 @@ const ExchangePropose = () => {
     const load = async () => {
       try {
         const [myProdsResponse, targetProd] = await Promise.all([
-          productApi.getUserProducts(user.id, { page: 0, size: 100 }), // Беремо всі товари
+          productApi.getUserProducts(user.id, { page: 0, size: 100 }), 
           productApi.getProductById(productId),
         ]);
 
-        // Фільтруємо тільки товари на обмін (isForTrade: true, isForSale: false)
         const filteredMyProducts = (myProdsResponse.content || []).filter(p => 
           p.isForTrade === true && p.isForSale === false
         );

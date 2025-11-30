@@ -9,9 +9,7 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(
   (config) => {
-    // Шукаємо токен у localStorage
     let token = localStorage.getItem('token');
-
     if (!token) {
       const userStr = localStorage.getItem('user');
       if (userStr) {
@@ -23,11 +21,9 @@ axiosClient.interceptors.request.use(
         }
       }
     }
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => {
@@ -37,7 +33,6 @@ axiosClient.interceptors.request.use(
 
 axiosClient.interceptors.response.use(
   (response) => {
-    // Якщо запит успішний (2xx), просто повертаємо дані
     return response;
   },
   (error) => {    
@@ -46,9 +41,7 @@ axiosClient.interceptors.response.use(
       
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
-      // window.location.href = '/login'; 
-    }
+          }
 
     return Promise.reject(error);
   }

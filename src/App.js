@@ -24,6 +24,9 @@ import ExchangeIncoming from './pages/ExchangeIncoming';
 import ExchangeOutgoing from './pages/ExchangeOutgoing';
 import CounterProposal from './pages/CounterProposal'; 
 import ViewProducts from './pages/ViewProducts';
+import Success from './pages/Success';
+import Cancel from './pages/Cancel';
+import UserProfile from './pages/UserProfile'; 
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -52,12 +55,15 @@ const RedirectToRegisterOnStart = () => {
 
 const protectedRoutes = [
   { path: '/', element: <Home /> },
+  { path: '/user/:id', element: <UserProfile /> },
   { path: '/my-products', element: <Products /> },
   { path: '/categories/:categoryName?', element: <Categories /> },
   { path: '/add-product', element: <AddProduct /> },
   { path: '/product/:id', element: <ProductDetail /> },
   { path: "/products/search", element: <ViewProducts /> },
   { path: '/edit-product/:id', element: <EditProduct /> },
+  { path: '/api/payments/success', element: <Success /> },
+  { path: '/api/payments/cancel', element: <Cancel /> },
   { path: '/exchange/propose/:productId', element: <ExchangePropose /> },
   { path: '/exchange/:id', element: <ExchangeDetail /> },
   { path: '/exchange/incoming', element: <ExchangeIncoming /> },

@@ -1,4 +1,4 @@
-import axiosClient from './axiosInstance'; // Твій базовий axios з токеном
+import axiosClient from './axiosInstance'; 
 
 const exchangeApi = {
   createProposal: async (requestDto) => {
