@@ -330,4 +330,66 @@
     width: calc(100% - 32px);
     margin: 16px 16px 20px;
   }
+
+.product-card-actions {
+  display: flex;
+  gap: 12px; 
+  padding: 0 20px 20px; 
+  margin-top: auto; 
+}
+
+.product-card-actions button {
+  flex: 1; 
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2; 
+}
+
+.edit-btn.small {
+  background-color: #F3F4F6;
+  color: #374151;
+}
+
+.edit-btn.small:hover {
+  background-color: #E5E7EB;
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.delete-btn.small {
+  width: auto !important; 
+  margin: 0 !important;   
+  background-color: #FEF2F2;
+  color: #DC2626;
+  border-color: #FECACA;
+}
+
+.delete-btn.small:hover {
+  background-color: #EF4444;
+  color: #ffffff;
+  border-color: #EF4444;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.15);
+}
+
+@media (max-width: 480px) {
+  .product-card-actions {
+    padding: 0 16px 16px;
+    gap: 8px;
+  }
+  
+  .product-card-actions button {
+    font-size: 13px;
+    padding: 8px 0;
+  }
+}
 }

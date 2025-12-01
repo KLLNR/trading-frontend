@@ -77,6 +77,11 @@ const Products = () => {
     loadProducts(nextPage);
   };
 
+  const handleEdit = (e, id) => {
+    e.stopPropagation(); 
+    navigate(`/edit-product/${id}`);
+  };
+
   const handleDelete = async (e, id) => {
     e.stopPropagation();
 
@@ -140,13 +145,21 @@ const Products = () => {
                 <p className="product-exchange">На обмін</p>
               ) : null}
 
-              <button
-                className="delete-btn"
-                onClick={(e) => handleDelete(e, product.id)}
-                style={{ marginTop: '10px', width: '100%', zIndex: 2 }}
-              >
-                Видалити
-              </button>
+              <div className="product-card-actions">
+                <button 
+                  className="edit-btn small" 
+                  onClick={(e) => handleEdit(e, product.id)}
+                >
+                  Редагувати
+                </button>
+                <button
+                  className="delete-btn small"
+                  onClick={(e) => handleDelete(e, product.id)}
+                >
+                  Видалити
+                </button>
+              </div>
+              
             </li>
           ))}
         </ul>
@@ -167,4 +180,4 @@ const Products = () => {
   );
 };
 
-export default Products;  
+export default Products;

@@ -213,7 +213,13 @@ const ProductDetail = () => {
                 )}
               </div>
             ) : (
-              <div className="owner-actions">
+              <div className="owner-actions" style={{ display: 'flex', gap: '10px' }}>
+                <button 
+                  className="edit-btn" 
+                  onClick={() => navigate(`/edit-product/${id}`)}
+                >
+                  Редагувати
+                </button>
                 <button className="delete-btn" onClick={handleDelete}>
                   Видалити
                 </button>
